@@ -94,8 +94,9 @@ admin commands (for the 'pi' user):
   ethbian-net.sh - simple network configuration
   ethbian-ssd-init.sh - ssd drive init
 
-to start geth: systemctl start geth
-to run geth on startup: systemctl enable geth
+after configuring network and ssd drive:
+- to start geth: sudo systemctl start geth
+- to run geth on startup: sudo systemctl enable geth
 
 web server (with system stats) is running on port 8000
 (user: eth, password: eth)
