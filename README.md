@@ -1,6 +1,6 @@
 # ethbian
 
-Easy way to run a full Ethereum node on Raspberry Pi 4
+The easy way to run a full Ethereum node on Raspberry Pi 4
 
 ## quick start
 
@@ -19,7 +19,7 @@ To verify the checksum of a downloaded file:
 | system | command                  |
 | ------ | ------------------------ |
 | Mac    | shasum -a 256 _filename_ |
-| Linux  | sha256 _filename_        |
+| Linux  | sha256sum _filename_        |
 
 #### b) or create your own image
 
@@ -75,7 +75,7 @@ basic system statistics and geth info. Default user is **eth**, password also **
 
 **/lib/systemd/system/geth.service** :geth settings  
 **/etc/webfsd.conf** :webfs settings  
-**/usr/local/bin** :geth binary  
+**/usr/local/bin/geth** :geth binary
 **/usr/local/sbin** :admin scripts
 
 **/home/eth/status2html-cron.sh** :creates status for webfs  
@@ -83,4 +83,4 @@ basic system statistics and geth info. Default user is **eth**, password also **
 **gat** :attach to geth console  
 **/var/log/geth.log** :geth logs
 
-For more details visit [http://ethbian.org](http://ethbian.org) (work in progress)
+For more details visit [http://ethbian.org](http://ethbian.org)

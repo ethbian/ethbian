@@ -59,7 +59,7 @@ echo ""
 
 echo "  # installing tools..."
 echo ""
-sudo apt-get install -y jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc webfs
+sudo apt-get install -y jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc webfs software-properties-common
 if [ ! -d /mnt/ssd ]; then
   sudo mkdir /mnt/ssd
 fi
