@@ -211,6 +211,14 @@ else
     echo '          [OK]'
 fi
 
+echo 'Checking syslog for influx: '
+CMD=`grep -c influxd /etc/rsyslog.conf`
+if [ $CMD -ne 2 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi
+
 echo 'Checking if collectd.conf file exists: '
 if [ -f /etc/collectd/collectd.conf ]; then
     echo '          [OK]'
@@ -246,10 +254,24 @@ else
     echo '          [ERROR]'
 fi
 
-echo 'Checking if inflcollectd service is enabled: '
+echo 'Checking if collectd service is enabled: '
 systemctl is-enabled --quiet collectd
 if [ $? -ne 0 ]; then
     echo '          [ERROR]'
 else
     echo '          [OK]'
+fi
+
+echo 'Checking if grafana.ini file exists: '
+if [ -f /etc/grafana/grafana.ini ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking if grafana.ini.org file exists: '
+if [ -f /etc/grafana/grafana.ini.org ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
 fi

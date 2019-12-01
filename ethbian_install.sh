@@ -255,7 +255,7 @@ GITHUB_GETH_STATUS='https://raw.githubusercontent.com/ethbian/geth_status_plugin
 
 echo ""
 echo "  # installing monitoring tools..."
-sudo apt-get install -y collectd collectd-utils influxdb influxdb-client grafana
+sudo apt-get install -y collectd collectd-utils influxdb influxdb-client
 echo ""
 
 echo "  # influx..."
@@ -264,6 +264,8 @@ sudo mv /etc/influxdb/influxdb.conf /etc/influxdb/influxdb.conf.org
 sudo mv admin/conf/influxdb.conf /etc/influxdb/
 sudo /bin/bash -c 'echo "GOMAXPROCS=1" >> /etc/default/influxdb'
 sudo systemctl enable influxdb
+sudo sed -i "/^auth/i :programname, isequal, \"influxd\" \/var\/log\/influx.log" /etc/rsyslog.conf
+sudo sed -i "/^auth/i :programname, isequal, \"influxd\" stop" /etc/rsyslog.conf
 echo ""
 
 echo "  # collectd..."
@@ -276,5 +278,27 @@ sudo wget $GITHUB_RPI_TEMP
 sudo wget $GITHUB_GETH_STATUS
 sudo systemctl enable collectd
 echo ""
+
+echo "  # grafana..."
+sudo wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -
+sudo /bin/bash -c 'echo "deb https://packages.grafana.com/oss/deb stable main" >> /etc/apt/sources.list.d/grafana.list'
+sudo apt-get update
+sudo apt-get install -y grafana
+
+sudo systemctl stop grafana-server
+sudo cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.org
+sudo sed -i 's/^;reporting_enabled = true/reporting_enabled = false/' /etc/grafana/grafana.ini
+sudo sed -i 's/^;check_for_updates = true/check_for_updates = false/' /etc/grafana/grafana.ini
+sudo sed -i 's/^;level = info/level = warn/' /etc/grafana/grafana.ini
+sudo sed -i '/Enable internal metrics/!b;n;cenabled = false' /etc/grafana/grafana.ini
+sudo sed -i 's/^;disable_total_stats = false/disable_total_stats = true/' /etc/grafana/grafana.ini
+sudo sed -i 's/^;allow_sign_up = true/allow_sign_up = false/' /etc/grafana/grafana.ini
+sudo systemctl daemon-reload
+sudo systemctl enable grafana-server
+echo ""
+
+echo "### Cleaning up"
+sudo apt-get remove -y avahi-daemon
+sudo apt -y autoremove
 
 echo "### Done."
