@@ -59,7 +59,7 @@ echo ""
 
 echo "  # installing tools..."
 echo ""
-sudo apt-get install -y jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc webfs software-properties-common
+sudo apt-get install -y jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc software-properties-common
 if [ ! -d /mnt/ssd ]; then
   sudo mkdir /mnt/ssd
 fi
@@ -93,12 +93,13 @@ sudo /bin/bash -c 'cat << EOF > /etc/motd
 admin commands (for the 'pi' user):
   ethbian-net.sh - simple network configuration
   ethbian-ssd-init.sh - ssd drive init
+  ethbian-geth-upgrade.sh - upgrade geth binary
 
 after configuring network and ssd drive:
 - to start geth: sudo systemctl start geth
 - to run geth on startup: sudo systemctl enable geth
 
-web server (with system stats) is running on port 8000
+grafana (with geth stats) is running on port 3000
 (user: eth, password: eth)
 
 SSD drive is a must.
@@ -111,11 +112,12 @@ EOF'
 echo ""
 echo -e "\nalias gat='sudo /usr/local/bin/gat'" >> /home/pi/.bashrc
 
-GITHUB_FROM='https://raw.githubusercontent.com/ethbian/ethbian/master'
-ADMIN_FILES='ethbian-net.sh ethbian-ssd-init.sh'
+GITHUB_FROM='https://raw.githubusercontent.com/ethbian/ethbian/v0.2'
+ADMIN_FILES='ethbian-net.sh ethbian-ssd-init.sh ethbian-geth-upgrade.sh'
+SCRIPT_PATH='admin/scripts'
 cd /usr/local/sbin
 for FILE in $ADMIN_FILES; do
-  sudo wget $GITHUB_FROM/$FILE && sudo chmod +x $FILE
+  sudo wget $GITHUB_FROM/$SCRIPT_PATH/$FILE && sudo chmod +x $FILE
 done
 
 echo "  # disabling swap..."
@@ -147,8 +149,6 @@ net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
 EOF'
 echo ""
-echo ""
-
 
 echo "### Hardware"
 
@@ -168,74 +168,9 @@ echo "  # disabling camera modules..."
 sudo /bin/bash -c 'echo -e "blacklist bcm2835_codec\nblacklist bcm2835_v4l2" > /etc/modprobe.d/disable_rpi4_camera.conf'
 echo ""
 
-echo ""
-
-echo "### webfs & status"
-
-echo "  # files and directories..."
-sudo mkdir -p /var/www/html
-sudo touch /var/www/html/index.html
-sudo chown eth:eth /var/www/html/index.html
-echo ""
-
-echo "  # config file..."
-sudo sed -i 's/^web_extras=""/web_extras="-b eth:eth"/' /etc/webfsd.conf
-sudo sed -i 's/^web_index=""/web_index="index.html"/' /etc/webfsd.conf
-echo ""
-
-echo "  # crontab and status..."
-FILE='status2html-cron.sh'
-cd /home/eth
-sudo wget $GITHUB_FROM/$FILE && sudo chmod +x $FILE && sudo chown eth:eth $FILE
-if [ -x $FILE ]; then
-  sudo /bin/bash -c "echo '*/5 * * * * /home/eth/'$FILE > /var/spool/cron/crontabs/eth"
-  sudo chown eth:crontab /var/spool/cron/crontabs/eth
-  sudo chmod 0600 /var/spool/cron/crontabs/eth
-fi
-
 sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/opt/vc/bin/vcgencmd measure_temp' >> /etc/sudoers"
 sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/syslog' >> /etc/sudoers"
 sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/geth.log' >> /etc/sudoers"
-
-sudo /bin/bash -c 'cat << EOF > /var/www/html/main.css
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-table {
-  border: solid 1px #ddeeee;
-  border-collapse: collapse;
-  border-spacing: 0;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-th {
-  background-color: #ddefef;
-  border: solid 1px #ddeeee;
-  color: #336b6b;
-  padding: 10px;
-  text-align: left;
-  text-shadow: 1px 1px 1px #fff;
-}
-
-td {
-  border: solid 1px #ddeeee;
-  color: #333;
-  padding: 10px;
-  text-shadow: 1px 1px 1px #fff;
-}
-
-pre {
-    white-space: pre-wrap;
-    white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;
-    white-space: -o-pre-wrap;
-    word-wrap: break-word;
-}
-EOF'
-
-echo ""
 
 echo "### GETH"
 GETH_BINARY='geth-linux-arm7-1.9.7-a718daa6.tar.gz'
@@ -313,5 +248,33 @@ sudo /bin/bash -c 'cat << EOF > /etc/logrotate.d/geth
   endscript
 }
 EOF'
+
+echo "### Monitoring"
+GITHUB_RPI_TEMP='https://raw.githubusercontent.com/ethbian/rpi_temperature_plugin4collectd/master/rpi_temperature.py'
+GITHUB_GETH_STATUS='https://raw.githubusercontent.com/ethbian/geth_status_plugin4collectd/master/geth_status.py'
+
+echo ""
+echo "  # installing monitoring tools..."
+sudo apt-get install -y collectd collectd-utils influxdb influxdb-client grafana
+echo ""
+
+echo "  # influx..."
+sudo systemctl stop influxdb
+sudo mv /etc/influxdb/influxdb.conf /etc/influxdb/influxdb.conf.org
+sudo mv admin/conf/influxdb.conf /etc/influxdb/
+sudo /bin/bash -c 'echo "GOMAXPROCS=1" >> /etc/default/influxdb'
+sudo systemctl enable influxdb
+echo ""
+
+echo "  # collectd..."
+sudo systemctl stop collectd
+sudo mv /etc/collectd/collectd.conf /etc/collectd/collectd.conf.org
+sudo mv admin/conf/collectd.conf /etc/collectd/
+sudo mkdir /usr/local/lib/collectd
+cd /usr/local/lib/collectd
+sudo wget $GITHUB_RPI_TEMP
+sudo wget $GITHUB_GETH_STATUS
+sudo systemctl enable collectd
+echo ""
 
 echo "### Done."

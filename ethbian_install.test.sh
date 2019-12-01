@@ -140,43 +140,6 @@ else
     echo '          [OK]'
 fi
 
-echo ""
-echo 'Checking if html directory exists: '
-if [ -d /var/www/html ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if index.html file exists: '
-if [ -f /var/www/html/index.html ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking main.css file: '
-CMD=`grep table /var/www/html/main.css`
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking webfs configuration: '
-CMD=`grep ^web_index /etc/webfsd.conf |grep -c index.html`
-if [ $CMD -ne 1 ]; then
-    echo -n '          [ERROR] '
-else
-    echo -n '          [OK] '
-fi
-CMD=`grep ^web_extras /etc/webfsd.conf |grep -c eth`
-if [ $CMD -ne 1 ]; then
-    echo ' [ERROR]'
-else
-    echo ' [OK]'
-fi
-
 echo 'Checking sudo configuration: '
 CMD=`sudo grep -c 'eth ALL=(ALL) NOPASSWD:/opt/vc/bin/vcgencmd measure_temp' /etc/sudoers`
 if [ $CMD -ne 1 ]; then
@@ -197,22 +160,6 @@ else
     echo ' [OK]'
 fi
 
-echo 'Checking crontab configuration: '
-CMD=`sudo grep status2html /var/spool/cron/crontabs/eth`
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking status2html file: '
-CMD=`grep index /home/eth/status2html-cron.sh`
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
 echo 'Checking if ethbian-net.sh file exists: '
 if [ -x /usr/local/sbin/ethbian-net.sh ]; then
     echo '          [OK]'
@@ -225,4 +172,84 @@ if [ -x /usr/local/sbin/ethbian-ssd-init.sh ]; then
     echo '          [OK]'
 else
     echo '          [ERROR]'
+fi
+
+echo 'Checking if ethbian-geth-upgrade.sh file exists: '
+if [ -x /usr/local/sbin/ethbian-geth-upgrade.sh ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking if influxdb.conf file exists: '
+if [ -f /etc/influxdb/influxdb.conf ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking if influxdb.conf.org file exists: '
+if [ -f /etc/influxdb/influxdb.conf.org ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking GOMAXPROCS for influxdb: '
+CMD=`grep GOMAXPROCS /etc/default/influxdb`
+if [ $? -ne 0 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi
+
+echo 'Checking if influxdb service is enabled: '
+systemctl is-enabled --quiet influxdb
+if [ $? -ne 0 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi
+
+echo 'Checking if collectd.conf file exists: '
+if [ -f /etc/collectd/collectd.conf ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking if collectd.conf.org file exists: '
+if [ -f /etc/collectd/collectd.conf.org ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking if /usr/local/lib/collectd directory exists: '
+if [ -d /usr/local/lib/collectd ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking if /usr/local/lib/collectd/rpi_temperature.py file exists: '
+if [ -f /usr/local/lib/collectd/rpi_temperature.py ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking if /usr/local/lib/collectd/geth_status.py file exists: '
+if [ -f /usr/local/lib/collectd/geth_status.py ]; then
+    echo '          [OK]'
+else
+    echo '          [ERROR]'
+fi
+
+echo 'Checking if inflcollectd service is enabled: '
+systemctl is-enabled --quiet collectd
+if [ $? -ne 0 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
 fi
