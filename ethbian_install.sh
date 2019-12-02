@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.1   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.2   *"
 echo "*****************************************"
 echo ""
 
@@ -59,7 +59,7 @@ echo ""
 
 echo "  # installing tools..."
 echo ""
-sudo apt-get install -y jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc software-properties-common
+sudo apt-get install -y git jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc software-properties-common
 if [ ! -d /mnt/ssd ]; then
   sudo mkdir /mnt/ssd
 fi
@@ -112,13 +112,14 @@ EOF'
 echo ""
 echo -e "\nalias gat='sudo /usr/local/bin/gat'" >> /home/pi/.bashrc
 
-GITHUB_FROM='https://raw.githubusercontent.com/ethbian/ethbian/v0.2'
-ADMIN_FILES='ethbian-net.sh ethbian-ssd-init.sh ethbian-geth-upgrade.sh'
-SCRIPT_PATH='admin/scripts'
-cd /usr/local/sbin
-for FILE in $ADMIN_FILES; do
-  sudo wget $GITHUB_FROM/$SCRIPT_PATH/$FILE && sudo chmod +x $FILE
-done
+cd /tmp
+git clone https://github.com/ethbian/ethbian.git
+cd ethbian
+# TODO:
+git checkout v0.2
+
+chmod +x admin/scripts/*
+mv admin/scripts/* /usr/local/sbin
 
 echo "  # disabling swap..."
 echo ""
@@ -256,6 +257,7 @@ GITHUB_GETH_STATUS='https://raw.githubusercontent.com/ethbian/geth_status_plugin
 echo ""
 echo "  # installing monitoring tools..."
 sudo apt-get install -y collectd collectd-utils influxdb influxdb-client
+cd /tmp/ethbian
 echo ""
 
 echo "  # influx..."
@@ -280,6 +282,7 @@ sudo systemctl enable collectd
 echo ""
 
 echo "  # grafana..."
+cd /tmp/ethbian
 sudo wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -
 sudo /bin/bash -c 'echo "deb https://packages.grafana.com/oss/deb stable main" >> /etc/apt/sources.list.d/grafana.list'
 sudo apt-get update
@@ -295,6 +298,13 @@ sudo sed -i 's/^;disable_total_stats = false/disable_total_stats = true/' /etc/g
 sudo sed -i 's/^;allow_sign_up = true/allow_sign_up = false/' /etc/grafana/grafana.ini
 sudo systemctl daemon-reload
 sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
+nc -zvw5 127.0.0.1 3000
+curl -X POST -H "Content-Type: application/json" -u admin:admin --show-error -d@admin/conf/grafana_ds_influx.json\
+ "http://127.0.0.1:3000/api/datasources"
+curl -X POST -H "Content-Type: application/json" -u admin:admin --show-error -d@admin/conf/grafana_dash_geth_status.json\
+ "http://127.0.0.1:3000/api/dashboards/db"
+sudo systemctl stop grafana-server
 echo ""
 
 echo "### Cleaning up"
