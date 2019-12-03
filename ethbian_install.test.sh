@@ -275,3 +275,19 @@ if [ -f /etc/grafana/grafana.ini.org ]; then
 else
     echo '          [ERROR]'
 fi
+
+echo 'Checking if grafana imported datasource: '
+CMD=`curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/datasources" |grep -c InfluxDB`
+if [ $CMD -ne 1 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi
+
+echo 'Checking if grafana imported dashboard: '
+CMD=`curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/dashboards/uid/:uid" |grep -c geth_status`
+if [ $CMD -ne 1 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi

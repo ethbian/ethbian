@@ -119,7 +119,8 @@ cd ethbian
 git checkout v0.2
 
 chmod +x admin/scripts/*
-mv admin/scripts/* /usr/local/sbin
+sudo mv admin/scripts/* /usr/local/sbin
+sudo chown root:root /usr/local/sbin/ethbian*
 
 echo "  # disabling swap..."
 echo ""
@@ -174,8 +175,8 @@ sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/syslog' >
 sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/geth.log' >> /etc/sudoers"
 
 echo "### GETH"
-GETH_BINARY='geth-linux-arm7-1.9.7-a718daa6.tar.gz'
-GETH_ASC='geth-linux-arm7-1.9.7-a718daa6.tar.gz.asc'
+GETH_BINARY='geth-linux-arm7-1.9.8-d62e9b28.tar.gz'
+GETH_ASC='geth-linux-arm7-1.9.8-d62e9b28.tar.gz.asc'
 
 echo "  # downloading the package..."
 echo ""
@@ -283,7 +284,7 @@ echo ""
 
 echo "  # grafana..."
 cd /tmp/ethbian
-sudo wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
 sudo /bin/bash -c 'echo "deb https://packages.grafana.com/oss/deb stable main" >> /etc/apt/sources.list.d/grafana.list'
 sudo apt-get update
 sudo apt-get install -y grafana
