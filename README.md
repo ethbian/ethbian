@@ -8,7 +8,7 @@ The easy way to run a full Ethereum node on Raspberry Pi 4
 
 #### a) download ethbian image
 
-Already prepared sd-card image can be found [here](http://ethbian.org/downloads/ethbian-v0.1-2019-11-17.img.gz)
+Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.1-2019-11-17.img.gz)
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
@@ -57,8 +57,12 @@ lower latency, reliable connection, speed.
 
 You can use the **ethbian-ssd-init.sh** script to initialize a new disk drive.  
 The script will wipe it out completely and create a maximum size single partition.  
-SSD should be mounted to **/mnt/ssd** directory with datadir subdirectory created  
-within (user eth should be the owner).
+SSD should be mounted to **/mnt/ssd** directory with **datadir** subdirectory created  
+within (user **eth** should be the owner).
+
+#### geth upgrade
+
+The **ethbian-geth-upgrade.sh** will upgrade your geth the the latest version.
 
 #### start geth
 
@@ -66,21 +70,19 @@ With network configured and disk mounted you are ready to go.
 **sudo systemctl start geth** will start geth.  
 **sudo systemctl enable geth** will make it start automatically on boot.
 
-#### some stats
+#### geth & RPi stats
 
-There's a tiny http server (webfs) running on port 8000 that serves some  
-basic system statistics and geth info. Default user is **eth**, password also **eth**.
+By default Grafana is running on port 3000 with default user **admin** and password **admin**.  
+You can monitor RPi temperature, system load and memory usage and some basic geth stats.
 
 #### files
 
 **/lib/systemd/system/geth.service** :geth settings  
-**/etc/webfsd.conf** :webfs settings  
-**/usr/local/bin/geth** :geth binary
+**/usr/local/bin/geth/geth** :geth binary.  
 **/usr/local/sbin** :admin scripts
 
-**/home/eth/status2html-cron.sh** :creates status for webfs  
 **temp** :shows Pi's temperature  
 **gat** :attach to geth console  
 **/var/log/geth.log** :geth logs
 
-For more details visit [http://ethbian.org](http://ethbian.org)
+For more details visit [https://ethbian.org](https://ethbian.org)
