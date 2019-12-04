@@ -89,6 +89,7 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
+               v0.2
 
 admin commands (for the 'pi' user):
   ethbian-net.sh - simple network configuration
@@ -99,8 +100,8 @@ after configuring network and ssd drive:
 - to start geth: sudo systemctl start geth
 - to run geth on startup: sudo systemctl enable geth
 
-grafana (with geth stats) is running on port 3000
-(user: eth, password: eth)
+grafana is running on port 3000
+(user: admin, password: admin)
 
 SSD drive is a must.
 Active cooling is highly recommended.
