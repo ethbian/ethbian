@@ -211,6 +211,14 @@ else
     echo '          [OK]'
 fi
 
+echo 'Checking if influxdb service is running: '
+systemctl is-active --quiet influxdb
+if [ $? -ne 0 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi
+
 echo 'Checking syslog for influx: '
 CMD=`grep -c influxd /etc/rsyslog.conf`
 if [ $CMD -ne 2 ]; then
@@ -262,6 +270,14 @@ else
     echo '          [OK]'
 fi
 
+echo 'Checking if collectd service is running: '
+systemctl is-active --quiet collectd
+if [ $? -ne 0 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi
+
 echo 'Checking if grafana.ini file exists: '
 if [ -f /etc/grafana/grafana.ini ]; then
     echo '          [OK]'
@@ -287,6 +303,22 @@ fi
 echo 'Checking if grafana imported dashboard: '
 CMD=`curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/dashboards/uid/:uid" |grep -c geth_status`
 if [ $CMD -ne 1 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi
+
+echo 'Checking if grafana service is enabled: '
+systemctl is-enabled --quiet grafana-server
+if [ $? -ne 0 ]; then
+    echo '          [ERROR]'
+else
+    echo '          [OK]'
+fi
+
+echo 'Checking if grafana service is running: '
+systemctl is-active --quiet grafana-server
+if [ $? -ne 0 ]; then
     echo '          [ERROR]'
 else
     echo '          [OK]'

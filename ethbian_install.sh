@@ -59,7 +59,7 @@ echo ""
 
 echo "  # installing tools..."
 echo ""
-sudo apt-get install -y git jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc software-properties-common
+sudo apt-get install -y git jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc sqlite3 software-properties-common
 if [ ! -d /mnt/ssd ]; then
   sudo mkdir /mnt/ssd
 fi
@@ -105,7 +105,7 @@ grafana (with geth stats) is running on port 3000
 SSD drive is a must.
 Active cooling is highly recommended.
 
-For more details visit http://ethbian.org
+For more details visit https://ethbian.org
 
 EOF'
 
@@ -115,8 +115,6 @@ echo -e "\nalias gat='sudo /usr/local/bin/gat'" >> /home/pi/.bashrc
 cd /tmp
 git clone https://github.com/ethbian/ethbian.git
 cd ethbian
-# TODO:
-git checkout v0.2
 
 chmod +x admin/scripts/*
 sudo mv admin/scripts/* /usr/local/sbin
@@ -174,6 +172,8 @@ sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/opt/vc/bin/vcgencmd measure_tem
 sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/syslog' >> /etc/sudoers"
 sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/geth.log' >> /etc/sudoers"
 
+sudo sed -i '/^exit/itest -f /etc/ssh/ssh_host_dsa_key || dpkg-reconfigure openssh-server' /etc/rc.local
+
 echo "### GETH"
 GETH_BINARY='geth-linux-arm7-1.9.8-d62e9b28.tar.gz'
 GETH_ASC='geth-linux-arm7-1.9.8-d62e9b28.tar.gz.asc'
@@ -218,7 +218,7 @@ After=network.target
 [Service]
 User=eth
 Group=eth
-ExecStart=/usr/local/bin/geth/geth --datadir=/mnt/ssd/datadir --cache 256 --syncmode fast --maxpeers 50 --light.maxpeers 10
+ExecStart=/usr/local/bin/geth/geth --datadir=/mnt/ssd/datadir --cache 128 --syncmode fast --maxpeers 50 --light.maxpeers 10
 KillMode=process
 Restart=on-failure
 RestartSec=60
@@ -285,7 +285,7 @@ echo ""
 echo "  # grafana..."
 cd /tmp/ethbian
 wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
-sudo /bin/bash -c 'echo "deb https://packages.grafana.com/oss/deb stable main" >> /etc/apt/sources.list.d/grafana.list'
+sudo /bin/bash -c 'echo "deb https://packages.grafana.com/oss/deb stable main" > /etc/apt/sources.list.d/grafana.list'
 sudo apt-get update
 sudo apt-get install -y grafana
 
@@ -300,13 +300,10 @@ sudo sed -i 's/^;allow_sign_up = true/allow_sign_up = false/' /etc/grafana/grafa
 sudo systemctl daemon-reload
 sudo systemctl enable grafana-server
 sudo systemctl start grafana-server
-nc -zvw5 127.0.0.1 3000
-curl -X POST -H "Content-Type: application/json" -u admin:admin --show-error -d@admin/conf/grafana_ds_influx.json\
- "http://127.0.0.1:3000/api/datasources"
-curl -X POST -H "Content-Type: application/json" -u admin:admin --show-error -d@admin/conf/grafana_dash_geth_status.json\
- "http://127.0.0.1:3000/api/dashboards/db"
+sleep 3
 sudo systemctl stop grafana-server
-echo ""
+cat admin/conf/grafana_datasource.sql | sudo sqlite3 /var/lib/grafana/grafana.db
+cat admin/conf/grafana_dashboard.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 
 echo "### Cleaning up"
 sudo apt-get remove -y avahi-daemon

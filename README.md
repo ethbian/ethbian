@@ -8,7 +8,7 @@ The easy way to run a full Ethereum node on Raspberry Pi 4
 
 #### a) download ethbian image
 
-Already prepared sd-card image can be found [here](http://ethbian.org/downloads/ethbian-v0.1-2019-11-17.img.gz)
+Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.1-2019-11-17.img.gz)
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
@@ -85,4 +85,4 @@ You can monitor RPi temperature, system load and memory usage and some basic get
 **gat** :attach to geth console  
 **/var/log/geth.log** :geth logs
 
-For more details visit [http://ethbian.org](http://ethbian.org)
+For more details visit [https://ethbian.org](https://ethbian.org)
