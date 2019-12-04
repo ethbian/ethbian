@@ -8,18 +8,18 @@ The easy way to run a full Ethereum node on Raspberry Pi 4
 
 #### a) download ethbian image
 
-Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.1-2019-11-17.img.gz)
+Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.2-2019-12-05.img.gz)
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
-| ethbian-v0.1-2019-11-17.img.gz | 831e4216104ad48697ebfae5d7449789b17d3360a4c0a0b279c974057dcad3c2 |
+| ethbian-v0.2-2019-12-05.img.gz | e01465da0327cbf57e9ab2e9881d1c19c79c862b791c9d7d2bdb2bc85ff8b99c |
 
 To verify the checksum of a downloaded file:
 
 | system | command                  |
 | ------ | ------------------------ |
 | Mac    | shasum -a 256 _filename_ |
-| Linux  | sha256sum _filename_        |
+| Linux  | sha256sum _filename_     |
 
 #### b) or create your own image
 
