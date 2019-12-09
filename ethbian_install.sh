@@ -94,7 +94,7 @@ sudo /bin/bash -c 'cat << EOF > /etc/motd
 admin commands (for the 'pi' user):
   ethbian-net.sh - simple network configuration
   ethbian-ssd-init.sh - ssd drive init
-  ethbian-geth-upgrade.sh - upgrade geth binary
+  ethbian-geth-admin.sh - upgrade geth binary
 
 after configuring network and ssd drive:
 - to start geth: sudo systemctl start geth

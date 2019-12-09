@@ -62,7 +62,7 @@ within (user **eth** should be the owner).
 
 #### geth upgrade
 
-The **ethbian-geth-upgrade.sh** will upgrade your geth the the latest version.
+The **ethbian-geth-admin.sh** will upgrade your geth to the latest version.
 
 #### start geth
 

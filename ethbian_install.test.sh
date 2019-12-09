@@ -2,324 +2,104 @@
 
 echo ""
 echo "*****************************************"
-echo "*       ETHBIAN INSTALL TEST v0.1       *"
+echo "*       ETHBIAN INSTALL TEST v0.2       *"
 echo "*****************************************"
 echo ""
 echo "*RR - requires reboot"
 echo ""
 
-echo 'Checking if user eth exists: '
-CMD=`id eth > /dev/null 2>&1`
-RESPONSE=$?
-if [ $RESPONSE -eq 0 ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
+# ------------------- functions ------------------
+function file_exists () {
+    echo "Checking if $2 exists"
+    if [ $1 $3 ]; then
+        echo '          [OK]'
+    else
+        echo '          [ERROR]'
+    fi
+}
 
-echo 'Checking if temp script exists: '
-if [ -x /usr/local/bin/temp ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
+function exec_code_check () {
+    echo $2
+    eval "$1"
+    if [ $? -ne 0 ]; then
+        echo '          [ERROR]'
+    else
+        echo '          [OK]'
+    fi
+}
 
-echo 'Checking if gat script exists: '
-if [ -x /usr/local/bin/gat ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
+function exec_output_check () {
+    echo $3
+    OUTPUT=$(eval "$2")
+    if [ $OUTPUT -ne $1 ]; then
+        echo '          [ERROR]'
+    else
+        echo '          [OK]'
+    fi
+}
 
-echo 'Checking if dphys-swapfile package was removed: '
-CMD=`dpkg -l |grep dphys-swapfile|wc -l`
-if [ $CMD -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
+# --------------------- basic ethbian checks ----------------
+exec_code_check 'id eth > /dev/null 2>&1' 'Checking if user eth exists: '
+file_exists '-x' 'temp script' '/usr/local/bin/temp'
+file_exists '-x' 'gat script' '/usr/local/bin/gat'
+exec_output_check 0 'dpkg -l| grep dphys-swapfile| wc -l' 'Checking if dphys-swapfile package was removed: '
+exec_output_check 0 'swapon -s |wc -w' 'Checking if swap is disabled (*RR): '
+file_exists '! -L' 'wpa_supplicant does not' '/etc/systemd/system/multi-user.target.wants/wpa_supplicant.service'
+exec_output_check 1 "ulimit -a |grep 'open files' |grep -c 32000" 'Checking if open files limit is increased (*RR): '
+exec_output_check 0 'ifconfig |grep -c inet6' 'Checking if IPv6 is disabled (*RR): '
+echo ''
 
-echo 'Checking if swap is disabled (*RR): '
-CMD=`swapon -s |wc -w`
-if [ $CMD -eq 0 ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
+# --------------------- hardware ----------------
+exec_output_check 0 'iw dev |grep -c Interface' 'Checking if wifi is disabled: '
+exec_output_check 0 'hciconfig |wc -l' 'Checking if bluetooth is disabled: '
+exec_output_check 0 'aplay -l 2>/dev/null|wc -l' 'Checking if sound card is disabled: '
+exec_output_check 0 'lsmod |grep -c bcm2835' 'Checking if camera modules are disabled: '
+echo ''
 
-echo 'Checking if wpa_supplicant is disabled: '
-if [ -L /etc/systemd/system/multi-user.target.wants/wpa_supplicant.service ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
+# --------------------- geth ----------------
+file_exists '-x' 'geth binary' '/usr/local/bin/geth/geth'
+file_exists '-f' 'geth.service file' '/lib/systemd/system/geth.service'
+exec_output_check 2 'grep -c geth /etc/rsyslog.conf' 'Checking syslog for geth: '
+exec_code_check 'grep geth /etc/logrotate.d/geth 1> /dev/null' 'Checking logrotate for geth: '
+echo ''
 
-echo 'Checking if open files limit is increased (*RR): '
-CMD=`ulimit -a |grep 'open files' |grep -c 32000`
-if [ $CMD -eq 1 ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
+# --------------------- sudo ---------------
+exec_output_check 1 "sudo grep -c 'eth ALL=(ALL) NOPASSWD:/opt/vc/bin/vcgencmd measure_temp' /etc/sudoers" \
+    'Checking sudo configuration: '
+exec_output_check 1 "sudo grep -c 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/syslog' /etc/sudoers" ''
+exec_output_check 1 "sudo grep -c 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/geth.log' /etc/sudoers" ''
 
-echo 'Checking if IPv6 is disabled (*RR): '
-CMD=`ifconfig |grep -c inet6`
-if [ $CMD -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
+# --------------------- admin scripts ---------------
+file_exists '-x' 'ethbian-net.sh script' '/usr/local/sbin/ethbian-net.sh'
+file_exists '-x' 'ethbian-ssd-init.sh script' '/usr/local/sbin/ethbian-ssd-init.sh'
+file_exists '-x' 'ethbian-geth-admin.sh script' '/usr/local/sbin/ethbian-geth-admin.sh'
+echo ''
 
+# --------------------- influx -----------------
+file_exists '-f' 'influxdb.conf file' '/etc/influxdb/influxdb.conf'
+file_exists '-f' 'influxdb.conf.org file' '/etc/influxdb/influxdb.conf.org'
+exec_code_check 'grep GOMAXPROCS /etc/default/influxdb 1> /dev/null' 'Checking GOMAXPROCS for influxdb: '
+exec_code_check 'systemctl is-enabled --quiet influxdb' 'Checking if influxdb service is enabled: '
+exec_code_check 'systemctl is-active --quiet influxdb' 'Checking if influxdb service is running: '
+exec_output_check 2 'grep -c influxd /etc/rsyslog.conf' 'Checking syslog for influx: '
+echo ''
 
-echo ""
-echo 'Checking if wifi is disabled: '
-CMD=`iw dev |grep -c Interface`
-if [ $CMD -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
+# --------------------- collectd ----------------
+file_exists '-f' 'collectd.conf file' '/etc/collectd/collectd.conf'
+file_exists '-f' 'collectd.conf.org file' '/etc/collectd/collectd.conf.org'
+file_exists '-d' 'collectd directory' '/usr/local/lib/collectd'
+file_exists '-f' 'rpi_temperature.py file' '/usr/local/lib/collectd/rpi_temperature.py'
+file_exists '-f' 'geth_status.py file' '/usr/local/lib/collectd/geth_status.py'
+exec_code_check 'systemctl is-enabled --quiet collectd' 'Checking if collectd service is enabled: '
+exec_code_check 'systemctl is-active --quiet collectd' 'Checking if collectd service is running: '
+echo ''
 
-echo 'Checking if bluetooth is disabled: '
-CMD=`hciconfig |wc -l`
-if [ $CMD -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if sound card is disabled: '
-CMD=`aplay -l 2>/dev/null|wc -l`
-if [ $CMD -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if camera modules are disabled: '
-CMD=`lsmod |grep -c bcm2835`
-if [ $CMD -eq 0 ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo ""
-echo 'Checking if geth is installed: '
-if [ -x /usr/local/bin/geth/geth ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if geth service file exists: '
-if [ -f /lib/systemd/system/geth.service ]; then
-    echo -n '          [OK] '
-else
-    echo -n '          [ERROR] '
-fi
-if [ -L /etc/systemd/system/geth.service ]; then
-    echo ' [OK]'
-else
-    echo ' [ERROR]'
-fi
-
-echo 'Checking syslog for geth: '
-CMD=`grep -c geth /etc/rsyslog.conf`
-if [ $CMD -ne 2 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking logrotate for geth: '
-CMD=`grep geth /etc/logrotate.d/geth`
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking sudo configuration: '
-CMD=`sudo grep -c 'eth ALL=(ALL) NOPASSWD:/opt/vc/bin/vcgencmd measure_temp' /etc/sudoers`
-if [ $CMD -ne 1 ]; then
-    echo -n '          [ERROR] '
-else
-    echo -n '          [OK] '
-fi
-CMD=`sudo grep -c 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/syslog' /etc/sudoers`
-if [ $CMD -ne 1 ]; then
-    echo -n ' [ERROR] '
-else
-    echo -n ' [OK] '
-fi
-CMD=`sudo grep -c 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/geth.log' /etc/sudoers`
-if [ $CMD -ne 1 ]; then
-    echo ' [ERROR]'
-else
-    echo ' [OK]'
-fi
-
-echo 'Checking if ethbian-net.sh file exists: '
-if [ -x /usr/local/sbin/ethbian-net.sh ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if ethbian-ssd-init.sh file exists: '
-if [ -x /usr/local/sbin/ethbian-ssd-init.sh ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if ethbian-geth-upgrade.sh file exists: '
-if [ -x /usr/local/sbin/ethbian-geth-upgrade.sh ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if influxdb.conf file exists: '
-if [ -f /etc/influxdb/influxdb.conf ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if influxdb.conf.org file exists: '
-if [ -f /etc/influxdb/influxdb.conf.org ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking GOMAXPROCS for influxdb: '
-CMD=`grep GOMAXPROCS /etc/default/influxdb`
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if influxdb service is enabled: '
-systemctl is-enabled --quiet influxdb
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if influxdb service is running: '
-systemctl is-active --quiet influxdb
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking syslog for influx: '
-CMD=`grep -c influxd /etc/rsyslog.conf`
-if [ $CMD -ne 2 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if collectd.conf file exists: '
-if [ -f /etc/collectd/collectd.conf ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if collectd.conf.org file exists: '
-if [ -f /etc/collectd/collectd.conf.org ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if /usr/local/lib/collectd directory exists: '
-if [ -d /usr/local/lib/collectd ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if /usr/local/lib/collectd/rpi_temperature.py file exists: '
-if [ -f /usr/local/lib/collectd/rpi_temperature.py ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if /usr/local/lib/collectd/geth_status.py file exists: '
-if [ -f /usr/local/lib/collectd/geth_status.py ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if collectd service is enabled: '
-systemctl is-enabled --quiet collectd
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if collectd service is running: '
-systemctl is-active --quiet collectd
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if grafana.ini file exists: '
-if [ -f /etc/grafana/grafana.ini ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if grafana.ini.org file exists: '
-if [ -f /etc/grafana/grafana.ini.org ]; then
-    echo '          [OK]'
-else
-    echo '          [ERROR]'
-fi
-
-echo 'Checking if grafana imported datasource: '
-CMD=`curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/datasources" |grep -c InfluxDB`
-if [ $CMD -ne 1 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if grafana imported dashboard: '
-CMD=`curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/dashboards/uid/:uid" |grep -c geth_status`
-if [ $CMD -ne 1 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if grafana service is enabled: '
-systemctl is-enabled --quiet grafana-server
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
-
-echo 'Checking if grafana service is running: '
-systemctl is-active --quiet grafana-server
-if [ $? -ne 0 ]; then
-    echo '          [ERROR]'
-else
-    echo '          [OK]'
-fi
+# --------------------- grafana ----------------
+file_exists '-f' 'grafana.ini file' '/etc/grafana/grafana.ini'
+file_exists '-f' 'grafana.ini.org file' '/etc/grafana/grafana.ini.org'
+exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/datasources" |grep -c InfluxDB' \
+    'Checking if grafana imported datasource: '
+exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/dashboards/uid/:uid" |grep -c geth_status' \
+    'Checking if grafana imported dashboard: '
+exec_code_check 'systemctl is-enabled --quiet grafana-server' 'Checking if grafana service is enabled: '
+exec_code_check 'systemctl is-active --quiet grafana-server' 'Checking if grafana service is running: '
