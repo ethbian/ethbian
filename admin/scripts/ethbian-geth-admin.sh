@@ -178,6 +178,8 @@ EOF'
       if [ ! -L /etc/systemd/system/geth.service ]; then
          sudo ln -s /lib/systemd/system/geth.service /etc/systemd/system/
       fi
+
+      sudo systemctl daemon-reload
    fi
 
    echo ''
