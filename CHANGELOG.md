@@ -6,10 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- influxdb
-- collectd
-- grafana
 - ethbian-geth-admin.sh
+- ethbian-monitoring.sh
+- geth_peers_geo2influx.py
+- grafana worldmap plugin
 
 ### Removed
 
