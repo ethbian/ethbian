@@ -68,9 +68,9 @@ The "**ethbian-geth-admin.sh -u**" will upgrade your geth to the latest version.
 
 Ethbian monitoring:  
 - collectd (collects system/geth data)  
-    - geth_peers_geo2influx.py script (geolocation, eth's crontab)  
-    - influx database (data storage)  
-    - grafana (data visualization)  
+- geth_peers_geo2influx.py script (geolocation, eth's crontab)  
+- influx database (data storage)  
+- grafana (data visualization)  
 
 Use the **ethbian-monitoring.sh** command do disable/enable these services  
 or check their status.
@@ -81,7 +81,7 @@ When monitoring services are running you can monitor RPi temperature, system loa
 and memory usage and some basic geth stats with a web browser:  
 Grafana is running on port 3000 with default user **admin** and password **admin**.  
 Just launch Firefox/Chrome/Safari and enter the following URL:  
-**http://pi's_IP_address:3000**, eg. http://192.168.1.33:3000
+**http<nolink>://pi's_IP_address:3000**, eg. http<nolink>://192.168.1.33:3000
 
 #### start geth
 

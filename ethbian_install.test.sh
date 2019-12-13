@@ -47,6 +47,7 @@ exec_output_check 0 'swapon -s |wc -w' 'Checking if swap is disabled (*RR): '
 file_exists '! -L' 'wpa_supplicant does not' '/etc/systemd/system/multi-user.target.wants/wpa_supplicant.service'
 exec_output_check 1 "ulimit -a |grep 'open files' |grep -c 32000" 'Checking if open files limit is increased (*RR): '
 exec_output_check 0 'ifconfig |grep -c inet6' 'Checking if IPv6 is disabled (*RR): '
+exec_output_check 16 '/usr/bin/vcgencmd get_mem gpu |cut -f 2 -d "=" |sed "s/.$//"' 'Checking GPUs memory (*RR): '
 echo ''
 
 # --------------------- hardware ----------------
@@ -73,6 +74,7 @@ exec_output_check 1 "sudo grep -c 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log
 file_exists '-x' 'ethbian-net.sh script' '/usr/local/sbin/ethbian-net.sh'
 file_exists '-x' 'ethbian-ssd-init.sh script' '/usr/local/sbin/ethbian-ssd-init.sh'
 file_exists '-x' 'ethbian-geth-admin.sh script' '/usr/local/sbin/ethbian-geth-admin.sh'
+file_exists '-x' 'ethbian-monitoring.sh script' '/usr/local/sbin/ethbian-monitoring.sh'
 echo ''
 
 # --------------------- influx -----------------
@@ -94,12 +96,21 @@ exec_code_check 'systemctl is-enabled --quiet collectd' 'Checking if collectd se
 exec_code_check 'systemctl is-active --quiet collectd' 'Checking if collectd service is running: '
 echo ''
 
+# --------------------- geth_peers_geo2influx ----------------
+file_exists '-f' 'geolite_city.mmdb file' '/usr/local/lib/collectd/geolite_city.mmdb'
+file_exists '-f' 'geth_peers_geo2influx.py file' '/usr/local/bin/geth_peers_geo2influx.py'
+file_exists '-f' '/var/log/geo2influx.log file' '/var/log/geo2influx.log'
+exec_output_check 1 'grep -c geth_peers_geo2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
+
 # --------------------- grafana ----------------
 file_exists '-f' 'grafana.ini file' '/etc/grafana/grafana.ini'
 file_exists '-f' 'grafana.ini.org file' '/etc/grafana/grafana.ini.org'
+exec_output_check 1 'sudo grafana-cli plugins ls |grep -c "grafana-worldmap-panel"' 'Checking grafana worldmap plugin: '
 exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/datasources" |grep -c InfluxDB' \
     'Checking if grafana imported datasource: '
-exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/dashboards/uid/:uid" |grep -c geth_status' \
-    'Checking if grafana imported dashboard: '
+exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/search/" |grep -c -E "geth_peers.*geth_status"' \
+    'Checking if grafana imported dashboards: '
+exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/search?starred=true" |grep -c -E "geth_peers.*geth_status"' \
+    'Checking if grafana starred dashboards: '
 exec_code_check 'systemctl is-enabled --quiet grafana-server' 'Checking if grafana service is enabled: '
 exec_code_check 'systemctl is-active --quiet grafana-server' 'Checking if grafana service is running: '
