@@ -118,6 +118,9 @@ cd /tmp
 git clone https://github.com/ethbian/ethbian.git
 cd ethbian
 
+# TODO
+git checkout v0.3
+
 chmod +x admin/scripts/*
 sudo mv admin/scripts/* /usr/local/sbin
 sudo chown root:root /usr/local/sbin/ethbian*
@@ -307,7 +310,8 @@ chown eth $GEO_LOG
 cd /usr/local/bin
 sudo wget ${GITHUB_GEO2INFLUX}${GEO_SCRIPT}
 sudo chmod +x $GEO_SCRIPT
-sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$GEO_SCRIPT > $GEO_LOG' > /var/spool/cron/crontabs/eth"
+sudo /bin/bash -c "echo 'SHELL=/bin/bash' > /var/spool/cron/crontabs/eth"
+sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$GEO_SCRIPT >> $GEO_LOG 2>&1' >> /var/spool/cron/crontabs/eth"
 
 echo "  # grafana..."
 cd /tmp/ethbian

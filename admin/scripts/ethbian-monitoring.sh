@@ -50,7 +50,7 @@ function stop_services () {
 function enable_cron () {
    CMD=`sudo grep $PEERSGEO_SCRIPT /var/spool/cron/crontabs/$PEERSGEO_USER |grep -c -v '^ *#'`
    if [ $CMD -eq 0 ]; then
-      sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$PEERSGEO_SCRIPT > $PEERSGEO_LOG' > /var/spool/cron/crontabs/$PEERSGEO_USER"
+      sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$PEERSGEO_SCRIPT >> $PEERSGEO_LOG 2>&1' >> /var/spool/cron/crontabs/$PEERSGEO_USER"
    fi
 }
 
