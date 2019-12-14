@@ -118,9 +118,6 @@ cd /tmp
 git clone https://github.com/ethbian/ethbian.git
 cd ethbian
 
-# TODO
-git checkout v0.3
-
 chmod +x admin/scripts/*
 sudo mv admin/scripts/* /usr/local/sbin
 sudo chown root:root /usr/local/sbin/ethbian*
@@ -170,7 +167,7 @@ sudo sed -i 's/dtparam=audio=on/dtparam=audio=off/' /boot/config.txt
 echo ""
 
 echo "  # reassigning memory from GPU to CPU..."
-sudo sed -i 'gpu_mem=16' /boot/config.txt
+sudo /bin/bash -c 'echo "gpu_mem=16" >> /boot/config.txt'
 echo ""
 
 echo "  # disabling camera modules..."
@@ -184,62 +181,7 @@ sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/geth.log'
 sudo sed -i '/^exit/itest -f /etc/ssh/ssh_host_dsa_key || dpkg-reconfigure openssh-server' /etc/rc.local
 
 echo "### GETH"
-GETH_BINARY='geth-linux-arm7-1.9.8-d62e9b28.tar.gz'
-GETH_ASC='geth-linux-arm7-1.9.8-d62e9b28.tar.gz.asc'
-
-echo "  # downloading the package..."
-echo ""
-cd /tmp
-wget https://gethstore.blob.core.windows.net/builds/$GETH_BINARY
-wget https://gethstore.blob.core.windows.net/builds/$GETH_ASC
-echo ""
-
-echo "  # verifying..."
-gpg --keyserver keyserver.ubuntu.com --recv-keys 9BA28146
-gpg --verify $GETH_ASC $GETH_BINARY
-if [ $? -ne 0 ] ; then 
-  echo " geth gpg verification error! "
-  exit 1
-fi
-echo ""
-
-echo "  # installing..."
-GETH_DIR=`echo $GETH_BINARY | sed 's/.tar.gz//'`
-cd /usr/local/bin
-sudo tar zxf /tmp/$GETH_BINARY
-if [ ! -d $GETH_DIR ]; then
-  echo " error unpacking geth binary "
-  exit 1
-fi
-sudo chown -R root:root $GETH_DIR
-if [ -L 'geth' ]; then
-  sudo rm geth
-fi
-sudo ln -s $GETH_DIR geth
-sudo /bin/bash -c 'echo "export PATH=\$PATH:/usr/local/bin/geth" >> /etc/profile'
-
-if [ ! -f /lib/systemd/system/geth.service ]; then
-  sudo /bin/bash -c 'cat << EOF > /lib/systemd/system/geth.service
-[Unit]
-Description=geth
-After=network.target
-
-[Service]
-User=eth
-Group=eth
-ExecStart=/usr/local/bin/geth/geth --datadir=/mnt/ssd/datadir --cache 128 --syncmode fast --maxpeers 50 --light.maxpeers 10
-KillMode=process
-Restart=on-failure
-RestartSec=60
-
-[Install]
-WantedBy=multi-user.target
-EOF'
-fi
-
-if [ ! -L /etc/systemd/system/geth.service ]; then
-  sudo ln -s /lib/systemd/system/geth.service /etc/systemd/system/
-fi
+/usr/local/sbin/ethbian-geth-admin.sh -i
 
 echo "  # syslog..."
 sudo sed -i "/^auth/i :programname, isequal, \"geth\" \/var\/log\/geth.log" /etc/rsyslog.conf
@@ -305,11 +247,15 @@ if [ -f $GEODB_FILE ]; then
     sudo mv /usr/local/lib/collectd/GeoLite2-City.mmdb /usr/local/lib/collectd/geolite_city.mmdb
   fi
 fi
-touch $GEO_LOG
-chown eth $GEO_LOG
+sudo touch $GEO_LOG
+sudo chown eth $GEO_LOG
 cd /usr/local/bin
 sudo wget ${GITHUB_GEO2INFLUX}${GEO_SCRIPT}
 sudo chmod +x $GEO_SCRIPT
+
+sudo touch /var/spool/cron/crontabs/eth
+sudo chown eth:crontab /var/spool/cron/crontabs/eth
+sudo chmod 0600 /var/spool/cron/crontabs/eth
 sudo /bin/bash -c "echo 'SHELL=/bin/bash' > /var/spool/cron/crontabs/eth"
 sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$GEO_SCRIPT >> $GEO_LOG 2>&1' >> /var/spool/cron/crontabs/eth"
 
@@ -340,7 +286,7 @@ cat admin/conf/grafana_dash_geth_peers.sql | sudo sqlite3 /var/lib/grafana/grafa
 cat admin/conf/grafana_star.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 
 echo "### Cleaning up"
-sudo apt-get remove -y avahi-daemon
+sudo apt-get remove -y avahi-daemon mariadb-common mysql-common libvirt0 openjdk-11-jre-headless adwaita-icon-theme
 sudo apt -y autoremove
 
 echo "### Done."

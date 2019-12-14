@@ -100,7 +100,7 @@ echo ''
 file_exists '-f' 'geolite_city.mmdb file' '/usr/local/lib/collectd/geolite_city.mmdb'
 file_exists '-f' 'geth_peers_geo2influx.py file' '/usr/local/bin/geth_peers_geo2influx.py'
 file_exists '-f' '/var/log/geo2influx.log file' '/var/log/geo2influx.log'
-exec_output_check 1 'grep -c geth_peers_geo2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
+exec_output_check 1 'sudo grep -c geth_peers_geo2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
 
 # --------------------- grafana ----------------
 file_exists '-f' 'grafana.ini file' '/etc/grafana/grafana.ini'
