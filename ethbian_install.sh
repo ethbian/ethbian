@@ -89,7 +89,7 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
-               v0.2
+               v0.3
 
 admin commands (for the 'pi' user):
   ethbian-net.sh - simple network configuration
@@ -117,7 +117,6 @@ echo -e "\nalias gat='sudo /usr/local/bin/gat'" >> /home/pi/.bashrc
 cd /tmp
 git clone https://github.com/ethbian/ethbian.git
 cd ethbian
-git checkout v0.3
 
 chmod +x admin/scripts/*
 sudo mv admin/scripts/* /usr/local/sbin
