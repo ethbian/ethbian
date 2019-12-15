@@ -1,0 +1,1 @@
+INSERT INTO data_source VALUES(1,1,2,'influxdb','InfluxDB','proxy','http://localhost:8086','','','collectd',0,'','',1,X'7b22687474704d6f6465223a22474554227d','2019-12-15 15:54:31','2019-12-15 15:54:53',0,'{}',0);

@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.2   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.3   *"
 echo "*****************************************"
 echo ""
 
@@ -89,12 +89,13 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
-               v0.2
+               v0.3
 
 admin commands (for the 'pi' user):
   ethbian-net.sh - simple network configuration
+  ethbian-geth-admin.sh - upgrade geth binary
   ethbian-ssd-init.sh - ssd drive init
-  ethbian-geth-upgrade.sh - upgrade geth binary
+  ethbian-monitoring.sh - system/geth monitoring on/off
 
 after configuring network and ssd drive:
 - to start geth: sudo systemctl start geth
@@ -165,6 +166,10 @@ echo "  # disabling sound card..."
 sudo sed -i 's/dtparam=audio=on/dtparam=audio=off/' /boot/config.txt
 echo ""
 
+echo "  # reassigning memory from GPU to CPU..."
+sudo /bin/bash -c 'echo "gpu_mem=16" >> /boot/config.txt'
+echo ""
+
 echo "  # disabling camera modules..."
 sudo /bin/bash -c 'echo -e "blacklist bcm2835_codec\nblacklist bcm2835_v4l2" > /etc/modprobe.d/disable_rpi4_camera.conf'
 echo ""
@@ -176,62 +181,7 @@ sudo /bin/bash -c "echo 'eth ALL=(ALL) NOPASSWD:/usr/bin/tail /var/log/geth.log'
 sudo sed -i '/^exit/itest -f /etc/ssh/ssh_host_dsa_key || dpkg-reconfigure openssh-server' /etc/rc.local
 
 echo "### GETH"
-GETH_BINARY='geth-linux-arm7-1.9.8-d62e9b28.tar.gz'
-GETH_ASC='geth-linux-arm7-1.9.8-d62e9b28.tar.gz.asc'
-
-echo "  # downloading the package..."
-echo ""
-cd /tmp
-wget https://gethstore.blob.core.windows.net/builds/$GETH_BINARY
-wget https://gethstore.blob.core.windows.net/builds/$GETH_ASC
-echo ""
-
-echo "  # verifying..."
-gpg --keyserver keyserver.ubuntu.com --recv-keys 9BA28146
-gpg --verify $GETH_ASC $GETH_BINARY
-if [ $? -ne 0 ] ; then 
-  echo " geth gpg verification error! "
-  exit 1
-fi
-echo ""
-
-echo "  # installing..."
-GETH_DIR=`echo $GETH_BINARY | sed 's/.tar.gz//'`
-cd /usr/local/bin
-sudo tar zxf /tmp/$GETH_BINARY
-if [ ! -d $GETH_DIR ]; then
-  echo " error unpacking geth binary "
-  exit 1
-fi
-sudo chown -R root:root $GETH_DIR
-if [ -L 'geth' ]; then
-  sudo rm geth
-fi
-sudo ln -s $GETH_DIR geth
-sudo /bin/bash -c 'echo "export PATH=\$PATH:/usr/local/bin/geth" >> /etc/profile'
-
-if [ ! -f /lib/systemd/system/geth.service ]; then
-  sudo /bin/bash -c 'cat << EOF > /lib/systemd/system/geth.service
-[Unit]
-Description=geth
-After=network.target
-
-[Service]
-User=eth
-Group=eth
-ExecStart=/usr/local/bin/geth/geth --datadir=/mnt/ssd/datadir --cache 128 --syncmode fast --maxpeers 50 --light.maxpeers 10
-KillMode=process
-Restart=on-failure
-RestartSec=60
-
-[Install]
-WantedBy=multi-user.target
-EOF'
-fi
-
-if [ ! -L /etc/systemd/system/geth.service ]; then
-  sudo ln -s /lib/systemd/system/geth.service /etc/systemd/system/
-fi
+/usr/local/sbin/ethbian-geth-admin.sh -i
 
 echo "  # syslog..."
 sudo sed -i "/^auth/i :programname, isequal, \"geth\" \/var\/log\/geth.log" /etc/rsyslog.conf
@@ -258,7 +208,7 @@ GITHUB_GETH_STATUS='https://raw.githubusercontent.com/ethbian/geth_status_plugin
 
 echo ""
 echo "  # installing monitoring tools..."
-sudo apt-get install -y collectd collectd-utils influxdb influxdb-client
+sudo apt-get install -y collectd collectd-utils influxdb influxdb-client python-influxdb python-geoip2
 cd /tmp/ethbian
 echo ""
 
@@ -283,6 +233,32 @@ sudo wget $GITHUB_GETH_STATUS
 sudo systemctl enable collectd
 echo ""
 
+echo "  # geth_peers_geo2influx..."
+GEODB_FILE='GeoLite2-City.tar.gz'
+GEO_SCRIPT='geth_peers_geo2influx.py'
+GEO_LOG='/var/log/geo2influx.log'
+GITHUB_GEO2INFLUX='https://raw.githubusercontent.com/ethbian/geth_peers_geo2influx/master/'
+
+cd /tmp
+wget https://geolite.maxmind.com/download/geoip/database/$GEODB_FILE
+if [ -f $GEODB_FILE ]; then
+  sudo tar -zxf $GEODB_FILE --directory /usr/local/lib/collectd --strip-components 1 --wildcards GeoLite2-City_*/GeoLite2-City.mmdb
+  if [ $? -eq 0 ]; then
+    sudo mv /usr/local/lib/collectd/GeoLite2-City.mmdb /usr/local/lib/collectd/geolite_city.mmdb
+  fi
+fi
+sudo touch $GEO_LOG
+sudo chown eth $GEO_LOG
+cd /usr/local/bin
+sudo wget ${GITHUB_GEO2INFLUX}${GEO_SCRIPT}
+sudo chmod +x $GEO_SCRIPT
+
+sudo touch /var/spool/cron/crontabs/eth
+sudo chown eth:crontab /var/spool/cron/crontabs/eth
+sudo chmod 0600 /var/spool/cron/crontabs/eth
+sudo /bin/bash -c "echo 'SHELL=/bin/bash' > /var/spool/cron/crontabs/eth"
+sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$GEO_SCRIPT >> $GEO_LOG 2>&1' >> /var/spool/cron/crontabs/eth"
+
 echo "  # grafana..."
 cd /tmp/ethbian
 wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
@@ -303,11 +279,14 @@ sudo systemctl enable grafana-server
 sudo systemctl start grafana-server
 sleep 3
 sudo systemctl stop grafana-server
-cat admin/conf/grafana_datasource.sql | sudo sqlite3 /var/lib/grafana/grafana.db
-cat admin/conf/grafana_dashboard.sql | sudo sqlite3 /var/lib/grafana/grafana.db
+sudo grafana-cli plugins install grafana-worldmap-panel
+cat admin/conf/grafana_ds_influx.sql | sudo sqlite3 /var/lib/grafana/grafana.db
+cat admin/conf/grafana_dash_geth_status.sql | sudo sqlite3 /var/lib/grafana/grafana.db
+cat admin/conf/grafana_dash_geth_peers.sql | sudo sqlite3 /var/lib/grafana/grafana.db
+cat admin/conf/grafana_star.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 
 echo "### Cleaning up"
-sudo apt-get remove -y avahi-daemon
+sudo apt-get remove -y avahi-daemon mariadb-common mysql-common libvirt0 openjdk-11-jre-headless adwaita-icon-theme
 sudo apt -y autoremove
 
 echo "### Done."
