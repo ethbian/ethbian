@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.2   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.3   *"
 echo "*****************************************"
 echo ""
 

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v0.3] - 2019-12-XX
+## [v0.3] - 2019-12-15
 
 ### Added
 
@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- ethbian_install.sh
 - ethbian_install.test.sh
 
 ## [v0.2] - 2019-12-05
