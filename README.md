@@ -1,7 +1,7 @@
 # ethbian
 
 **The easy way to run a full Ethereum node on Raspberry Pi 4**  
-Lastest version: **v0.3**  
+Lastest version: **v0.4**
 Homepage: [https://ethbian.org](https://ethbian.org)  
 
 ## quick start

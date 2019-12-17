@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*       ETHBIAN INSTALL TEST v0.3       *"
+echo "*       ETHBIAN INSTALL TEST v0.4       *"
 echo "*****************************************"
 echo ""
 echo "*RR - requires reboot"
@@ -84,6 +84,7 @@ exec_code_check 'grep GOMAXPROCS /etc/default/influxdb 1> /dev/null' 'Checking G
 exec_code_check 'systemctl is-enabled --quiet influxdb' 'Checking if influxdb service is enabled: '
 exec_code_check 'systemctl is-active --quiet influxdb' 'Checking if influxdb service is running: '
 exec_output_check 2 'grep -c influxd /etc/rsyslog.conf' 'Checking syslog for influx: '
+exec_code_check 'grep influx /etc/logrotate.d/influx 1> /dev/null' 'Checking logrotate for influx: '
 echo ''
 
 # --------------------- collectd ----------------
@@ -94,6 +95,7 @@ file_exists '-f' 'rpi_temperature.py file' '/usr/local/lib/collectd/rpi_temperat
 file_exists '-f' 'geth_status.py file' '/usr/local/lib/collectd/geth_status.py'
 exec_code_check 'systemctl is-enabled --quiet collectd' 'Checking if collectd service is enabled: '
 exec_code_check 'systemctl is-active --quiet collectd' 'Checking if collectd service is running: '
+exec_code_check 'grep collectd /etc/logrotate.d/collectd 1> /dev/null' 'Checking logrotate for collectd: '
 echo ''
 
 # --------------------- geth_peers_geo2influx ----------------
@@ -101,6 +103,7 @@ file_exists '-f' 'geolite_city.mmdb file' '/usr/local/lib/collectd/geolite_city.
 file_exists '-f' 'geth_peers_geo2influx.py file' '/usr/local/bin/geth_peers_geo2influx.py'
 file_exists '-f' '/var/log/geo2influx.log file' '/var/log/geo2influx.log'
 exec_output_check 1 'sudo grep -c geth_peers_geo2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
+exec_code_check 'grep geo2influx /etc/logrotate.d/geo2influx 1> /dev/null' 'Checking logrotate for geo2influx: '
 
 # --------------------- grafana ----------------
 file_exists '-f' 'grafana.ini file' '/etc/grafana/grafana.ini'

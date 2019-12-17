@@ -2,9 +2,26 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.3   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.4   *"
 echo "*****************************************"
 echo ""
+
+function create_logrotate_config () {
+  sudo /bin/bash -c "cat << EOF > /etc/logrotate.d/$1
+/var/log/$2
+{
+  rotate 7
+  daily
+  missingok
+  notifempty
+  delaycompress
+  compress
+  postrotate
+    /usr/lib/rsyslog/rsyslog-rotate
+  endscript
+}
+EOF"
+}
 
 echo -n "### Detecting CPU architecture... "
 isARM=$(uname -m | grep -c 'arm')
@@ -89,7 +106,7 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
-               v0.3
+               v0.4
 
 admin commands (for the 'pi' user):
   ethbian-net.sh - simple network configuration
@@ -187,20 +204,7 @@ echo "  # syslog..."
 sudo sed -i "/^auth/i :programname, isequal, \"geth\" \/var\/log\/geth.log" /etc/rsyslog.conf
 sudo sed -i "/^auth/i :programname, isequal, \"geth\" stop" /etc/rsyslog.conf
 
-sudo /bin/bash -c 'cat << EOF > /etc/logrotate.d/geth
-/var/log/geth.log
-{
-  rotate 7
-  daily
-  missingok
-  notifempty
-  delaycompress
-  compress
-  postrotate
-    /usr/lib/rsyslog/rsyslog-rotate
-  endscript
-}
-EOF'
+create_logrotate_config 'geth' 'geth.log'
 
 echo "### Monitoring"
 GITHUB_RPI_TEMP='https://raw.githubusercontent.com/ethbian/rpi_temperature_plugin4collectd/master/rpi_temperature.py'
@@ -220,6 +224,7 @@ sudo /bin/bash -c 'echo "GOMAXPROCS=1" >> /etc/default/influxdb'
 sudo systemctl enable influxdb
 sudo sed -i "/^auth/i :programname, isequal, \"influxd\" \/var\/log\/influx.log" /etc/rsyslog.conf
 sudo sed -i "/^auth/i :programname, isequal, \"influxd\" stop" /etc/rsyslog.conf
+create_logrotate_config 'influx' 'influx.log'
 echo ""
 
 echo "  # collectd..."
@@ -231,6 +236,7 @@ cd /usr/local/lib/collectd
 sudo wget $GITHUB_RPI_TEMP
 sudo wget $GITHUB_GETH_STATUS
 sudo systemctl enable collectd
+create_logrotate_config 'collectd' 'collectd.log'
 echo ""
 
 echo "  # geth_peers_geo2influx..."
@@ -249,6 +255,7 @@ if [ -f $GEODB_FILE ]; then
 fi
 sudo touch $GEO_LOG
 sudo chown eth $GEO_LOG
+create_logrotate_config 'geo2influx' 'geo2influx.log'
 cd /usr/local/bin
 sudo wget ${GITHUB_GEO2INFLUX}${GEO_SCRIPT}
 sudo chmod +x $GEO_SCRIPT
@@ -286,7 +293,7 @@ cat admin/conf/grafana_dash_geth_peers.sql | sudo sqlite3 /var/lib/grafana/grafa
 cat admin/conf/grafana_star.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 
 echo "### Cleaning up"
-sudo apt-get remove -y avahi-daemon mariadb-common mysql-common libvirt0 openjdk-11-jre-headless adwaita-icon-theme
+sudo apt-get purge -y avahi-daemon mariadb-common mysql-common libvirt0 openjdk-11-jre-headless adwaita-icon-theme
 sudo apt -y autoremove
 
 echo "### Done."

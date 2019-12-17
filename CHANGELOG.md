@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.4] - 2019-12-XX
+
+### Added
+
+- logrotate configs
+
+
 ## [v0.3] - 2019-12-15
 
 ### Added
