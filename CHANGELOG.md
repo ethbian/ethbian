@@ -7,7 +7,19 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - logrotate configs
+- eth_price2influx.py
+- grafana clock panel plugin
 
+### Changed
+
+- collectd config file
+- ethbian-monitoring.sh
+- ethbian_install.sh
+- ethbian_install.test.sh
+
+### Removed
+
+- collectd df plugin
 
 ## [v0.3] - 2019-12-15
 

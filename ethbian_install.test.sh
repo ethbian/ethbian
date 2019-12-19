@@ -105,13 +105,20 @@ file_exists '-f' '/var/log/geo2influx.log file' '/var/log/geo2influx.log'
 exec_output_check 1 'sudo grep -c geth_peers_geo2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
 exec_code_check 'grep geo2influx /etc/logrotate.d/geo2influx 1> /dev/null' 'Checking logrotate for geo2influx: '
 
+# --------------------- eth_price2influx ----------------
+file_exists '-f' 'eth_price2influx.py file' '/usr/local/bin/eth_price2influx.py'
+file_exists '-f' '/var/log/price2influx.log file' '/var/log/price2influx.log'
+exec_output_check 1 'sudo grep -c eth_price2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
+exec_code_check 'grep eth_price2influx /etc/logrotate.d/price2influx 1> /dev/null' 'Checking logrotate for eth_price2influx: '
+
 # --------------------- grafana ----------------
 file_exists '-f' 'grafana.ini file' '/etc/grafana/grafana.ini'
 file_exists '-f' 'grafana.ini.org file' '/etc/grafana/grafana.ini.org'
 exec_output_check 1 'sudo grafana-cli plugins ls |grep -c "grafana-worldmap-panel"' 'Checking grafana worldmap plugin: '
+exec_output_check 1 'sudo grafana-cli plugins ls |grep -c "grafana-clock-panel"' 'Checking grafana clock plugin: '
 exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/datasources" |grep -c InfluxDB' \
     'Checking if grafana imported datasource: '
-exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/search/" |grep -c -E "geth_peers.*geth_status"' \
+exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/search/" |grep -c -E "eth_price.*geth_peers.*geth_status"' \
     'Checking if grafana imported dashboards: '
 exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/search?starred=true" |grep -c -E "geth_peers.*geth_status"' \
     'Checking if grafana starred dashboards: '

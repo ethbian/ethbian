@@ -76,7 +76,7 @@ echo ""
 
 echo "  # installing tools..."
 echo ""
-sudo apt-get install -y git jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc sqlite3 software-properties-common
+sudo apt-get install -y git jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc sqlite3 software-properties-common python-requests
 if [ ! -d /mnt/ssd ]; then
   sudo mkdir /mnt/ssd
 fi
@@ -266,6 +266,19 @@ sudo chmod 0600 /var/spool/cron/crontabs/eth
 sudo /bin/bash -c "echo 'SHELL=/bin/bash' > /var/spool/cron/crontabs/eth"
 sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$GEO_SCRIPT >> $GEO_LOG 2>&1' >> /var/spool/cron/crontabs/eth"
 
+echo "  # eth_price2influx..."
+PRICE_LOG='/var/log/price2influx.log'
+PRICE_SCRIPT='eth_price2influx.py'
+GITHUB_PRICE2INFLUX='https://raw.githubusercontent.com/ethbian/eth_price2influx/master/eth_price2influx.py'
+
+sudo touch $PRICE_LOG
+sudo chown eth $PRICE_LOG
+create_logrotate_config 'price2influx' 'price2influx.log'
+cd /usr/local/bin
+sudo wget $GITHUB_PRICE2INFLUX
+sudo chmod +x $PRICE_SCRIPT
+sudo /bin/bash -c "echo '*/5 * * * * /usr/local/bin/$PRICE_SCRIPT >> $PRICE_LOG 2>&1' >> /var/spool/cron/crontabs/eth"
+
 echo "  # grafana..."
 cd /tmp/ethbian
 wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
@@ -287,9 +300,11 @@ sudo systemctl start grafana-server
 sleep 3
 sudo systemctl stop grafana-server
 sudo grafana-cli plugins install grafana-worldmap-panel
+sudo grafana-cli plugins install grafana-clock-panel
 cat admin/conf/grafana_ds_influx.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 cat admin/conf/grafana_dash_geth_status.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 cat admin/conf/grafana_dash_geth_peers.sql | sudo sqlite3 /var/lib/grafana/grafana.db
+cat admin/conf/grafana_dash_eth_price.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 cat admin/conf/grafana_star.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 
 echo "### Cleaning up"

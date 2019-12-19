@@ -1,7 +1,7 @@
 # ethbian
 
 **The easy way to run a full Ethereum node on Raspberry Pi 4**  
-Lastest version: **v0.4**
+Lastest version: **v0.4**  
 Homepage: [https://ethbian.org](https://ethbian.org)  
 
 ## quick start
@@ -71,6 +71,7 @@ The "**ethbian-geth-admin.sh -u**" will upgrade your geth to the latest version.
 Ethbian monitoring:  
 - collectd (collects system/geth data)  
 - geth_peers_geo2influx.py script (geolocation, eth's crontab)  
+- eth_price2influx.py script (eth price, eth's crontab)  
 - influx database (data storage)  
 - grafana (data visualization)  
 
