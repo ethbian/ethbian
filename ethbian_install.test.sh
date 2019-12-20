@@ -41,6 +41,7 @@ function exec_output_check () {
 # --------------------- basic ethbian checks ----------------
 exec_code_check 'id eth > /dev/null 2>&1' 'Checking if user eth exists: '
 file_exists '-x' 'temp script' '/usr/local/bin/temp'
+file_exists '-x' 'gsync script' '/usr/local/bin/gsync'
 file_exists '-x' 'gat script' '/usr/local/bin/gat'
 exec_output_check 0 'dpkg -l| grep dphys-swapfile| wc -l' 'Checking if dphys-swapfile package was removed: '
 exec_output_check 0 'swapon -s |wc -w' 'Checking if swap is disabled (*RR): '

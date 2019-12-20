@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - logrotate configs
 - eth_price2influx.py
 - grafana clock panel plugin
+- gsync script
 
 ### Changed
 
@@ -16,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - ethbian-monitoring.sh
 - ethbian_install.sh
 - ethbian_install.test.sh
+- temp(erature) script
 
 ### Removed
 

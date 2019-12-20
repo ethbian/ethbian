@@ -81,20 +81,19 @@ if [ ! -d /mnt/ssd ]; then
   sudo mkdir /mnt/ssd
 fi
 
-sudo /bin/bash -c 'cat << EOF > /usr/local/bin/temp
+sudo /bin/bash -c 'cat << EOF > /usr/local/bin/gsync
 #!/bin/sh
-/opt/vc/bin/vcgencmd measure_temp
+echo 'eth.syncing' |sudo gat |grep tBlock
 EOF'
-sudo chmod +x /usr/local/bin/temp
+sudo chmod +x /usr/local/bin/gsync
 
 /bin/bash -c 'cat << EOF >> /home/pi/.bashrc
 
 # show pi temperature
 echo 
-echo ------------------
-echo -n "  Pi "
-/opt/vc/bin/vcgencmd measure_temp
-echo ------------------
+echo ----------------------------------
+/usr/local/bin/temp
+echo ----------------------------------
 EOF'
 
 sudo /bin/bash -c 'cat << EOF > /usr/local/bin/gat
@@ -136,8 +135,9 @@ git clone https://github.com/ethbian/ethbian.git
 cd ethbian
 
 chmod +x admin/scripts/*
+sudo chown root:root admin/scripts/*
+sudo mv admin/scripts/temp /usr/local/bin
 sudo mv admin/scripts/* /usr/local/sbin
-sudo chown root:root /usr/local/sbin/ethbian*
 
 echo "  # disabling swap..."
 echo ""

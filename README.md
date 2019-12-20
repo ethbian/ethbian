@@ -1,6 +1,7 @@
 # ethbian
 
-**The easy way to run a full Ethereum node on Raspberry Pi 4**  
+The easy way to run a full Ethereum node on Raspberry Pi 4  
+**Ethbian = Raspbian + Geth + Grafana**  
 Lastest version: **v0.4**  
 Homepage: [https://ethbian.org](https://ethbian.org)  
 
@@ -99,8 +100,9 @@ With network configured and disk mounted you are ready to go.
 **/usr/local/bin/geth/geth** :geth binary.  
 **/usr/local/sbin** :admin scripts
 
-**temp** :shows Pi's temperature  
+**temp** :shows CPU temperature  
 **gat** :attach to geth console  
+**gsync** :shows geth synchronization progress
 **/var/log/geth.log** :geth logs
 
 For more details visit [https://ethbian.org](https://ethbian.org)

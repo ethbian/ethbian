@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ ! -r /sys/class/thermal/thermal_zone0/temp ]; then
+   echo 'Cannot read CPU temperature: (/sys/class/thermal/thermal_zone0/temp)'
+   exit 1
+fi
+
+RAW_TEMP=`cat /sys/class/thermal/thermal_zone0/temp`
+
+C_TEMP=$(($RAW_TEMP/1000))
+F_TEMP=$((($RAW_TEMP*18+320000)/10000))
+
+echo '  CPU temperature:' ${C_TEMP}'`C ('${F_TEMP}'`F)'
