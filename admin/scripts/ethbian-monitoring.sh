@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN MONITORING CONFIG v0.1     *"
+echo "*    ETHBIAN MONITORING CONFIG v0.2     *"
 echo "*****************************************"
 echo ""
 
@@ -11,7 +11,9 @@ COLLECTD_SERVICE='collectd'
 GRAFANA_SERVICE='grafana-server'
 PEERSGEO_USER='eth'
 PEERSGEO_SCRIPT='geth_peers_geo2influx.py'
+PRICE_SCRIPT='eth_price2influx.py'
 PEERSGEO_LOG='/var/log/geo2influx.log'
+PRICE_LOG='/var/log/price2influx.log'
 
 # --------------------------- helpers -------------------
 function get_status () {
@@ -51,6 +53,7 @@ function enable_cron () {
    CMD=`sudo grep $PEERSGEO_SCRIPT /var/spool/cron/crontabs/$PEERSGEO_USER |grep -c -v '^ *#'`
    if [ $CMD -eq 0 ]; then
       sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$PEERSGEO_SCRIPT >> $PEERSGEO_LOG 2>&1' >> /var/spool/cron/crontabs/$PEERSGEO_USER"
+      sudo /bin/bash -c "echo '*/5 * * * * /usr/local/bin/$PRICE_SCRIPT >> $PRICE_LOG 2>&1' >> /var/spool/cron/crontabs/$PEERSGEO_USER"
    fi
 }
 
@@ -58,6 +61,7 @@ function disable_cron () {
    CMD=`sudo grep $PEERSGEO_SCRIPT /var/spool/cron/crontabs/$PEERSGEO_USER |grep -c -v '^ *#'`
    if [ $CMD -ne 0 ]; then
       sudo sed -i "/$PEERSGEO_SCRIPT/d" /var/spool/cron/crontabs/$PEERSGEO_USER
+      sudo sed -i "/$PRICE_SCRIPT/d" /var/spool/cron/crontabs/$PEERSGEO_USER
    fi
 }
 
@@ -66,11 +70,12 @@ function main_info () {
     whiptail --title ' monitoring info ' --backtitle 'Ethbian monitoring configuration' \
     --msgbox "Ethbian monitoring:\n\n\
     - collectd (collects system/geth data)\n\
-    - geth_peers... script (geolocation, eth's crontab)\n\
+    - geo_peers... script (geolocation, eth's crontab)\n\
+    - eth_price... script (eth price, eth's crontab)\n\
     - influx database (data storage)\n\
     - grafana (data visualization)\n\n\
         Here you can switch all of them on or off"\
-    14 60
+    15 60
 }
 
 function check_status () {
@@ -91,7 +96,8 @@ function check_status () {
     GRAFANA_ENABLED=$STATUS
 
     PEERSGEO_STATUS=`sudo grep $PEERSGEO_SCRIPT /var/spool/cron/crontabs/$PEERSGEO_USER |grep -c -v '^ *#'`
-    if [ $PEERSGEO_STATUS -eq 0 ]; then
+    PRICE_STATUS=`sudo grep $PRICE_SCRIPT /var/spool/cron/crontabs/$PEERSGEO_USER |grep -c -v '^ *#'`
+    if [ $PEERSGEO_STATUS -eq 0 ] || [ $PRICE_STATUS -eq 0 ]; then
         PEERSGEO_STATUS=false
     else
         PEERSGEO_STATUS=true
@@ -143,7 +149,7 @@ function main_status () {
         GRAFANA_SUMMARY+=' [STOPPED] '
     fi
 
-    PEERSGEO_SUMMARY=' peers2geo:       -  '
+    PEERSGEO_SUMMARY=' geo|price:       -  '
     if [ "$PEERSGEO_STATUS" = true ]; then
         PEERSGEO_SUMMARY+='      [RUNNING] '
     else
@@ -166,13 +172,13 @@ function main_menu () {
 
     if [ "$ALL_SERVICES" == 'running' ]; then
         INFO="\nAll the services are enabled and running"
-        MENU=('1)' 'stop and disable all the services' '2)' 'restart the services' '3)' 'stop the services'  '4)' 'disable geo2ip cronjob' '5)' 'show monitoring services status')
+        MENU=('1)' 'stop and disable all the services' '2)' 'restart the services' '3)' 'stop the services'  '4)' 'disable geo|price cronjob' '5)' 'show monitoring services status')
     elif [ "$ALL_SERVICES" == 'stopped' ]; then
         INFO="\nAll the services are disabled and stopped"
-        MENU=('1)' 'start and enable all the services' '2)' 'start the services' '3)' 'enable the services'  '4)' 'enable geo2ip cronjob' '5)' 'show monitoring services status')
+        MENU=('1)' 'start and enable all the services' '2)' 'start the services' '3)' 'enable the services'  '4)' 'enable geo|price cronjob' '5)' 'show monitoring services status')
     else
         INFO="\nNot all of the services are enabled or running"
-        MENU=('1)' 'restart and enable all the services' '2)' 'stop and disable all the services' '3)' 'enable geo2ip cronjob' '4)' 'disable geo2ip cronjob' '5)' 'show monitoring services status')
+        MENU=('1)' 'restart and enable all the services' '2)' 'stop and disable all the services' '3)' 'enable geo|price cronjob' '4)' 'disable geo|price cronjob' '5)' 'show monitoring services status')
     fi
 
     ACTION=$(

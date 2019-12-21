@@ -2,9 +2,26 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.3   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.4   *"
 echo "*****************************************"
 echo ""
+
+function create_logrotate_config () {
+  sudo /bin/bash -c "cat << EOF > /etc/logrotate.d/$1
+/var/log/$2
+{
+  rotate 7
+  daily
+  missingok
+  notifempty
+  delaycompress
+  compress
+  postrotate
+    /usr/lib/rsyslog/rsyslog-rotate
+  endscript
+}
+EOF"
+}
 
 echo -n "### Detecting CPU architecture... "
 isARM=$(uname -m | grep -c 'arm')
@@ -59,25 +76,24 @@ echo ""
 
 echo "  # installing tools..."
 echo ""
-sudo apt-get install -y git jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc sqlite3 software-properties-common
+sudo apt-get install -y git jq dstat lsof nmap screen tmux fail2ban dialog sysstat ipcalc sqlite3 software-properties-common python-requests
 if [ ! -d /mnt/ssd ]; then
   sudo mkdir /mnt/ssd
 fi
 
-sudo /bin/bash -c 'cat << EOF > /usr/local/bin/temp
+sudo /bin/bash -c 'cat << EOF > /usr/local/bin/gsync
 #!/bin/sh
-/opt/vc/bin/vcgencmd measure_temp
+echo 'eth.syncing' |sudo gat |grep tBlock
 EOF'
-sudo chmod +x /usr/local/bin/temp
+sudo chmod +x /usr/local/bin/gsync
 
 /bin/bash -c 'cat << EOF >> /home/pi/.bashrc
 
 # show pi temperature
 echo 
-echo ------------------
-echo -n "  Pi "
-/opt/vc/bin/vcgencmd measure_temp
-echo ------------------
+echo ----------------------------------
+/usr/local/bin/temp
+echo ----------------------------------
 EOF'
 
 sudo /bin/bash -c 'cat << EOF > /usr/local/bin/gat
@@ -89,7 +105,7 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
-               v0.3
+               v0.4
 
 admin commands (for the 'pi' user):
   ethbian-net.sh - simple network configuration
@@ -119,8 +135,9 @@ git clone https://github.com/ethbian/ethbian.git
 cd ethbian
 
 chmod +x admin/scripts/*
+sudo chown root:root admin/scripts/*
+sudo mv admin/scripts/temp /usr/local/bin
 sudo mv admin/scripts/* /usr/local/sbin
-sudo chown root:root /usr/local/sbin/ethbian*
 
 echo "  # disabling swap..."
 echo ""
@@ -187,20 +204,7 @@ echo "  # syslog..."
 sudo sed -i "/^auth/i :programname, isequal, \"geth\" \/var\/log\/geth.log" /etc/rsyslog.conf
 sudo sed -i "/^auth/i :programname, isequal, \"geth\" stop" /etc/rsyslog.conf
 
-sudo /bin/bash -c 'cat << EOF > /etc/logrotate.d/geth
-/var/log/geth.log
-{
-  rotate 7
-  daily
-  missingok
-  notifempty
-  delaycompress
-  compress
-  postrotate
-    /usr/lib/rsyslog/rsyslog-rotate
-  endscript
-}
-EOF'
+create_logrotate_config 'geth' 'geth.log'
 
 echo "### Monitoring"
 GITHUB_RPI_TEMP='https://raw.githubusercontent.com/ethbian/rpi_temperature_plugin4collectd/master/rpi_temperature.py'
@@ -220,6 +224,7 @@ sudo /bin/bash -c 'echo "GOMAXPROCS=1" >> /etc/default/influxdb'
 sudo systemctl enable influxdb
 sudo sed -i "/^auth/i :programname, isequal, \"influxd\" \/var\/log\/influx.log" /etc/rsyslog.conf
 sudo sed -i "/^auth/i :programname, isequal, \"influxd\" stop" /etc/rsyslog.conf
+create_logrotate_config 'influx' 'influx.log'
 echo ""
 
 echo "  # collectd..."
@@ -231,6 +236,7 @@ cd /usr/local/lib/collectd
 sudo wget $GITHUB_RPI_TEMP
 sudo wget $GITHUB_GETH_STATUS
 sudo systemctl enable collectd
+create_logrotate_config 'collectd' 'collectd.log'
 echo ""
 
 echo "  # geth_peers_geo2influx..."
@@ -249,6 +255,7 @@ if [ -f $GEODB_FILE ]; then
 fi
 sudo touch $GEO_LOG
 sudo chown eth $GEO_LOG
+create_logrotate_config 'geo2influx' 'geo2influx.log'
 cd /usr/local/bin
 sudo wget ${GITHUB_GEO2INFLUX}${GEO_SCRIPT}
 sudo chmod +x $GEO_SCRIPT
@@ -258,6 +265,19 @@ sudo chown eth:crontab /var/spool/cron/crontabs/eth
 sudo chmod 0600 /var/spool/cron/crontabs/eth
 sudo /bin/bash -c "echo 'SHELL=/bin/bash' > /var/spool/cron/crontabs/eth"
 sudo /bin/bash -c "echo '*/30 * * * * /usr/local/bin/$GEO_SCRIPT >> $GEO_LOG 2>&1' >> /var/spool/cron/crontabs/eth"
+
+echo "  # eth_price2influx..."
+PRICE_LOG='/var/log/price2influx.log'
+PRICE_SCRIPT='eth_price2influx.py'
+GITHUB_PRICE2INFLUX='https://raw.githubusercontent.com/ethbian/eth_price2influx/master/eth_price2influx.py'
+
+sudo touch $PRICE_LOG
+sudo chown eth $PRICE_LOG
+create_logrotate_config 'price2influx' 'price2influx.log'
+cd /usr/local/bin
+sudo wget $GITHUB_PRICE2INFLUX
+sudo chmod +x $PRICE_SCRIPT
+sudo /bin/bash -c "echo '*/5 * * * * /usr/local/bin/$PRICE_SCRIPT >> $PRICE_LOG 2>&1' >> /var/spool/cron/crontabs/eth"
 
 echo "  # grafana..."
 cd /tmp/ethbian
@@ -280,13 +300,15 @@ sudo systemctl start grafana-server
 sleep 3
 sudo systemctl stop grafana-server
 sudo grafana-cli plugins install grafana-worldmap-panel
+sudo grafana-cli plugins install grafana-clock-panel
 cat admin/conf/grafana_ds_influx.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 cat admin/conf/grafana_dash_geth_status.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 cat admin/conf/grafana_dash_geth_peers.sql | sudo sqlite3 /var/lib/grafana/grafana.db
+cat admin/conf/grafana_dash_eth_price.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 cat admin/conf/grafana_star.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 
 echo "### Cleaning up"
-sudo apt-get remove -y avahi-daemon mariadb-common mysql-common libvirt0 openjdk-11-jre-headless adwaita-icon-theme
+sudo apt-get purge -y avahi-daemon mariadb-common mysql-common libvirt0 openjdk-11-jre-headless adwaita-icon-theme
 sudo apt -y autoremove
 
 echo "### Done."

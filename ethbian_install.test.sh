@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*       ETHBIAN INSTALL TEST v0.3       *"
+echo "*       ETHBIAN INSTALL TEST v0.4       *"
 echo "*****************************************"
 echo ""
 echo "*RR - requires reboot"
@@ -41,6 +41,7 @@ function exec_output_check () {
 # --------------------- basic ethbian checks ----------------
 exec_code_check 'id eth > /dev/null 2>&1' 'Checking if user eth exists: '
 file_exists '-x' 'temp script' '/usr/local/bin/temp'
+file_exists '-x' 'gsync script' '/usr/local/bin/gsync'
 file_exists '-x' 'gat script' '/usr/local/bin/gat'
 exec_output_check 0 'dpkg -l| grep dphys-swapfile| wc -l' 'Checking if dphys-swapfile package was removed: '
 exec_output_check 0 'swapon -s |wc -w' 'Checking if swap is disabled (*RR): '
@@ -84,6 +85,7 @@ exec_code_check 'grep GOMAXPROCS /etc/default/influxdb 1> /dev/null' 'Checking G
 exec_code_check 'systemctl is-enabled --quiet influxdb' 'Checking if influxdb service is enabled: '
 exec_code_check 'systemctl is-active --quiet influxdb' 'Checking if influxdb service is running: '
 exec_output_check 2 'grep -c influxd /etc/rsyslog.conf' 'Checking syslog for influx: '
+exec_code_check 'grep influx /etc/logrotate.d/influx 1> /dev/null' 'Checking logrotate for influx: '
 echo ''
 
 # --------------------- collectd ----------------
@@ -94,6 +96,7 @@ file_exists '-f' 'rpi_temperature.py file' '/usr/local/lib/collectd/rpi_temperat
 file_exists '-f' 'geth_status.py file' '/usr/local/lib/collectd/geth_status.py'
 exec_code_check 'systemctl is-enabled --quiet collectd' 'Checking if collectd service is enabled: '
 exec_code_check 'systemctl is-active --quiet collectd' 'Checking if collectd service is running: '
+exec_code_check 'grep collectd /etc/logrotate.d/collectd 1> /dev/null' 'Checking logrotate for collectd: '
 echo ''
 
 # --------------------- geth_peers_geo2influx ----------------
@@ -101,14 +104,22 @@ file_exists '-f' 'geolite_city.mmdb file' '/usr/local/lib/collectd/geolite_city.
 file_exists '-f' 'geth_peers_geo2influx.py file' '/usr/local/bin/geth_peers_geo2influx.py'
 file_exists '-f' '/var/log/geo2influx.log file' '/var/log/geo2influx.log'
 exec_output_check 1 'sudo grep -c geth_peers_geo2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
+exec_code_check 'grep geo2influx /etc/logrotate.d/geo2influx 1> /dev/null' 'Checking logrotate for geo2influx: '
+
+# --------------------- eth_price2influx ----------------
+file_exists '-f' 'eth_price2influx.py file' '/usr/local/bin/eth_price2influx.py'
+file_exists '-f' '/var/log/price2influx.log file' '/var/log/price2influx.log'
+exec_output_check 1 'sudo grep -c eth_price2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
+exec_code_check 'grep price2influx /etc/logrotate.d/price2influx 1> /dev/null' 'Checking logrotate for eth_price2influx: '
 
 # --------------------- grafana ----------------
 file_exists '-f' 'grafana.ini file' '/etc/grafana/grafana.ini'
 file_exists '-f' 'grafana.ini.org file' '/etc/grafana/grafana.ini.org'
 exec_output_check 1 'sudo grafana-cli plugins ls |grep -c "grafana-worldmap-panel"' 'Checking grafana worldmap plugin: '
+exec_output_check 1 'sudo grafana-cli plugins ls |grep -c "grafana-clock-panel"' 'Checking grafana clock plugin: '
 exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/datasources" |grep -c InfluxDB' \
     'Checking if grafana imported datasource: '
-exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/search/" |grep -c -E "geth_peers.*geth_status"' \
+exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/search/" |grep -c -E "eth_price.*geth_peers.*geth_status"' \
     'Checking if grafana imported dashboards: '
 exec_output_check 1 'curl -s -X GET -u admin:admin "http://127.0.0.1:3000/api/search?starred=true" |grep -c -E "geth_peers.*geth_status"' \
     'Checking if grafana starred dashboards: '

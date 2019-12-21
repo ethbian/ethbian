@@ -165,7 +165,7 @@ After=network.target
 [Service]
 User=eth
 Group=eth
-ExecStart=/usr/local/bin/geth/geth --datadir=/mnt/ssd/datadir --cache 128 --syncmode fast --maxpeers 50 --light.maxpeers 10
+ExecStart=/usr/local/bin/geth/geth --datadir=/mnt/ssd/datadir --cache 256 --syncmode fast --maxpeers 50 --light.maxpeers 10
 KillMode=process
 Restart=on-failure
 RestartSec=60

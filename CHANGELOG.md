@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.4] - 2019-12-21
+
+### Added
+
+- logrotate configs
+- eth_price2influx.py
+- grafana clock panel plugin
+- gsync script
+
+### Changed
+
+- collectd config file
+- ethbian-monitoring.sh
+- ethbian_install.sh
+- ethbian_install.test.sh
+- temp(erature) script
+
+### Removed
+
+- collectd df plugin
+
 ## [v0.3] - 2019-12-15
 
 ### Added
