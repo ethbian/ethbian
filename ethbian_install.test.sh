@@ -110,7 +110,7 @@ exec_code_check 'grep geo2influx /etc/logrotate.d/geo2influx 1> /dev/null' 'Chec
 file_exists '-f' 'eth_price2influx.py file' '/usr/local/bin/eth_price2influx.py'
 file_exists '-f' '/var/log/price2influx.log file' '/var/log/price2influx.log'
 exec_output_check 1 'sudo grep -c eth_price2influx.py /var/spool/cron/crontabs/eth' 'Checking crontab for the eth user: '
-exec_code_check 'grep eth_price2influx /etc/logrotate.d/price2influx 1> /dev/null' 'Checking logrotate for eth_price2influx: '
+exec_code_check 'grep price2influx /etc/logrotate.d/price2influx 1> /dev/null' 'Checking logrotate for eth_price2influx: '
 
 # --------------------- grafana ----------------
 file_exists '-f' 'grafana.ini file' '/etc/grafana/grafana.ini'

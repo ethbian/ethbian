@@ -11,11 +11,11 @@ Homepage: [https://ethbian.org](https://ethbian.org)
 
 #### a) download ethbian image
 
-Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.3-2019-12-15.img.gz)
+Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.4-2019-12-21.img.gz)
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
-| ethbian-v0.3-2019-12-15.img.gz | 9a5957532a841b96f051dabb50845d51317c570d0f8053a5d169906630f61a36 |
+| ethbian-v0.4-2019-12-21.img.gz | 9a5957532a841b96f051dabb50845d51317c570d0f8053a5d169906630f61a36 |
 
 To verify the checksum of a downloaded file:
 
