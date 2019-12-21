@@ -3,7 +3,7 @@
 The easy way to run a full Ethereum node on Raspberry Pi 4  
 **Ethbian = Raspbian + Geth + Grafana**  
 Lastest version: **v0.4**  
-Homepage: [https://ethbian.org](https://ethbian.org)  
+Homepage: [https://ethbian.org](https://ethbian.org)
 
 ## quick start
 
@@ -15,7 +15,7 @@ Already prepared sd-card image can be found [here](https://ethbian.org/downloads
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
-| ethbian-v0.4-2019-12-21.img.gz | 9a5957532a841b96f051dabb50845d51317c570d0f8053a5d169906630f61a36 |
+| ethbian-v0.4-2019-12-21.img.gz | e13eff2dba0fbee9906a3d55478cdd842622ff0ed3273821b28d0b17574a7d2d |
 
 To verify the checksum of a downloaded file:
 
@@ -69,19 +69,20 @@ The "**ethbian-geth-admin.sh -u**" will upgrade your geth to the latest version.
 
 #### system/geth monitoring
 
-Ethbian monitoring:  
-- collectd (collects system/geth data)  
-- geth_peers_geo2influx.py script (geolocation, eth's crontab)  
-- eth_price2influx.py script (eth price, eth's crontab)  
-- influx database (data storage)  
-- grafana (data visualization)  
+Ethbian monitoring:
+
+- collectd (collects system/geth data)
+- geth_peers_geo2influx.py script (geolocation, eth's crontab)
+- eth_price2influx.py script (eth price, eth's crontab)
+- influx database (data storage)
+- grafana (data visualization)
 
 Use the **ethbian-monitoring.sh** command do disable/enable these services  
 or check their status.
 
 #### geth & RPi stats dashboard
 
-When monitoring services are running you can monitor RPi temperature, system load   
+When monitoring services are running you can monitor RPi temperature, system load  
 and memory usage and some basic geth stats with a web browser:  
 Grafana is running on port 3000 with default user **admin** and password **admin**.  
 Just launch Firefox/Chrome/Safari and enter the following URL:  
@@ -92,7 +93,6 @@ Just launch Firefox/Chrome/Safari and enter the following URL:
 With network configured and disk mounted you are ready to go.  
 **sudo systemctl start geth** will start geth.  
 **sudo systemctl enable geth** will make it start automatically on boot.
-
 
 #### files
 
