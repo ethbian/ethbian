@@ -2,7 +2,7 @@
 
 The easy way to run a full Ethereum node on Raspberry Pi 4  
 **Ethbian = Raspbian + Geth + Grafana**  
-Lastest version: **v0.4**  
+Lastest version: **v0.5**  
 Homepage: [https://ethbian.org](https://ethbian.org)
 
 ## quick start

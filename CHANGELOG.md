@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.5] - 2020-01-XY
+
+### Added
+
+- ethbian-64bit.sh
+
+### Changed
+
+- ethbian-ssd-init.sh
+
 ## [v0.4] - 2019-12-21
 
 ### Added

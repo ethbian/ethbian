@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.4   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.5   *"
 echo "*****************************************"
 echo ""
 
@@ -105,15 +105,16 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
-               v0.4
+               v0.5
 
 admin commands (for the 'pi' user):
+  ethbian-64bit.sh - switch to 64bit kernel
   ethbian-net.sh - simple network configuration
   ethbian-geth-admin.sh - upgrade geth binary
   ethbian-ssd-init.sh - ssd drive init
   ethbian-monitoring.sh - system/geth monitoring on/off
 
-after configuring network and ssd drive:
+after switching to 64bit kernel, configuring network and ssd drive:
 - to start geth: sudo systemctl start geth
 - to run geth on startup: sudo systemctl enable geth
 
@@ -133,6 +134,7 @@ echo -e "\nalias gat='sudo /usr/local/bin/gat'" >> /home/pi/.bashrc
 cd /tmp
 git clone https://github.com/ethbian/ethbian.git
 cd ethbian
+git checkout v0.5
 
 chmod +x admin/scripts/*
 sudo chown root:root admin/scripts/*
@@ -310,5 +312,6 @@ cat admin/conf/grafana_star.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 echo "### Cleaning up"
 sudo apt-get purge -y avahi-daemon mariadb-common mysql-common libvirt0 openjdk-11-jre-headless adwaita-icon-theme
 sudo apt -y autoremove
+sudo apt clean
 
 echo "### Done."

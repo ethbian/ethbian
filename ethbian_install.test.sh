@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*       ETHBIAN INSTALL TEST v0.4       *"
+echo "*       ETHBIAN INSTALL TEST v0.5       *"
 echo "*****************************************"
 echo ""
 echo "*RR - requires reboot"
@@ -76,6 +76,7 @@ file_exists '-x' 'ethbian-net.sh script' '/usr/local/sbin/ethbian-net.sh'
 file_exists '-x' 'ethbian-ssd-init.sh script' '/usr/local/sbin/ethbian-ssd-init.sh'
 file_exists '-x' 'ethbian-geth-admin.sh script' '/usr/local/sbin/ethbian-geth-admin.sh'
 file_exists '-x' 'ethbian-monitoring.sh script' '/usr/local/sbin/ethbian-monitoring.sh'
+file_exists '-x' 'ethbian-64bit.sh script' '/usr/local/sbin/ethbian-64bit.sh'
 echo ''
 
 # --------------------- influx -----------------
