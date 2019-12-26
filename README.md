@@ -11,11 +11,11 @@ Homepage: [https://ethbian.org](https://ethbian.org)
 
 #### a) download ethbian image
 
-Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.4-2019-12-21.img.gz)
+Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.5-2019-12-27.img.gz)
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
-| ethbian-v0.4-2019-12-21.img.gz | e13eff2dba0fbee9906a3d55478cdd842622ff0ed3273821b28d0b17574a7d2d |
+| ethbian-v0.5-2019-12-27.img.gz | a892e68476a770e7ec67f4a82630d32be03845ded6d1b88e61e559509c248e38 |
 
 To verify the checksum of a downloaded file:
 
@@ -68,7 +68,7 @@ with **datadir** subdirectory created within (user **eth** should be the owner).
 Because of memory allocation problem with the latest Raspbian and RPi4  
 you should switch to 64bit kernel - by executing the **ethbian-64bit.sh** script.  
 If you don't - when fully synced, geth will crash every couple of minutes/hours  
-causing your Pi to hang eventually.  
+causing your Pi to hang eventually.
 
 #### geth upgrade
 
