@@ -109,7 +109,7 @@ With network configured and disk mounted you are ready to go.
 
 **temp** :shows CPU temperature  
 **gat** :attach to geth console  
-**gsync** :shows geth synchronization progress
+**gsync** :shows geth synchronization progress  
 **/var/log/geth.log** :geth logs
 
 For more details visit [https://ethbian.org](https://ethbian.org)
