@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.4   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.5   *"
 echo "*****************************************"
 echo ""
 
@@ -105,15 +105,16 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
-               v0.4
+               v0.5
 
 admin commands (for the 'pi' user):
+  ethbian-64bit.sh - switch to 64bit kernel
   ethbian-net.sh - simple network configuration
   ethbian-geth-admin.sh - upgrade geth binary
   ethbian-ssd-init.sh - ssd drive init
   ethbian-monitoring.sh - system/geth monitoring on/off
 
-after configuring network and ssd drive:
+after switching to 64bit kernel, configuring network and ssd drive:
 - to start geth: sudo systemctl start geth
 - to run geth on startup: sudo systemctl enable geth
 
@@ -285,8 +286,9 @@ wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
 sudo /bin/bash -c 'echo "deb https://packages.grafana.com/oss/deb stable main" > /etc/apt/sources.list.d/grafana.list'
 sudo apt-get update
 sudo apt-get install -y grafana
-
 sudo systemctl stop grafana-server
+sleep 10
+
 sudo cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.org
 sudo sed -i 's/^;reporting_enabled = true/reporting_enabled = false/' /etc/grafana/grafana.ini
 sudo sed -i 's/^;check_for_updates = true/check_for_updates = false/' /etc/grafana/grafana.ini
@@ -297,8 +299,9 @@ sudo sed -i 's/^;allow_sign_up = true/allow_sign_up = false/' /etc/grafana/grafa
 sudo systemctl daemon-reload
 sudo systemctl enable grafana-server
 sudo systemctl start grafana-server
-sleep 3
+sleep 10
 sudo systemctl stop grafana-server
+sleep 5
 sudo grafana-cli plugins install grafana-worldmap-panel
 sudo grafana-cli plugins install grafana-clock-panel
 cat admin/conf/grafana_ds_influx.sql | sudo sqlite3 /var/lib/grafana/grafana.db
@@ -310,5 +313,6 @@ cat admin/conf/grafana_star.sql | sudo sqlite3 /var/lib/grafana/grafana.db
 echo "### Cleaning up"
 sudo apt-get purge -y avahi-daemon mariadb-common mysql-common libvirt0 openjdk-11-jre-headless adwaita-icon-theme
 sudo apt -y autoremove
+sudo apt clean
 
 echo "### Done."

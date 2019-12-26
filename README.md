@@ -2,7 +2,7 @@
 
 The easy way to run a full Ethereum node on Raspberry Pi 4  
 **Ethbian = Raspbian + Geth + Grafana**  
-Lastest version: **v0.4**  
+Lastest version: **v0.5**  
 Homepage: [https://ethbian.org](https://ethbian.org)
 
 ## quick start
@@ -11,11 +11,11 @@ Homepage: [https://ethbian.org](https://ethbian.org)
 
 #### a) download ethbian image
 
-Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.4-2019-12-21.img.gz)
+Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.5-2019-12-27.img.gz)
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
-| ethbian-v0.4-2019-12-21.img.gz | e13eff2dba0fbee9906a3d55478cdd842622ff0ed3273821b28d0b17574a7d2d |
+| ethbian-v0.5-2019-12-27.img.gz | a892e68476a770e7ec67f4a82630d32be03845ded6d1b88e61e559509c248e38 |
 
 To verify the checksum of a downloaded file:
 
@@ -58,10 +58,17 @@ lower latency, reliable connection, speed.
 
 #### SSD disk configuration
 
-You can use the **ethbian-ssd-init.sh** script to initialize a new disk drive.  
-The script will wipe it out completely and create a maximum size single partition.  
-SSD should be mounted to **/mnt/ssd** directory with **datadir** subdirectory created  
-within (user **eth** should be the owner).
+You can use the **ethbian-ssd-init.sh** script to initialize a new disk drive  
+or remount your partition after upgrading Ethbian.  
+If you prefer to do this manually - SSD should be mounted to the **/mnt/ssd** directory  
+with **datadir** subdirectory created within (user **eth** should be the owner).
+
+#### switching to 64bit kernel
+
+Because of memory allocation problem with the latest Raspbian and RPi4  
+you should switch to 64bit kernel - by executing the **ethbian-64bit.sh** script.  
+If you don't - when fully synced, geth will crash every couple of minutes/hours  
+causing your Pi to hang eventually.
 
 #### geth upgrade
 
@@ -102,7 +109,7 @@ With network configured and disk mounted you are ready to go.
 
 **temp** :shows CPU temperature  
 **gat** :attach to geth console  
-**gsync** :shows geth synchronization progress
+**gsync** :shows geth synchronization progress  
 **/var/log/geth.log** :geth logs
 
 For more details visit [https://ethbian.org](https://ethbian.org)
