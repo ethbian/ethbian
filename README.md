@@ -58,10 +58,17 @@ lower latency, reliable connection, speed.
 
 #### SSD disk configuration
 
-You can use the **ethbian-ssd-init.sh** script to initialize a new disk drive.  
-The script will wipe it out completely and create a maximum size single partition.  
-SSD should be mounted to **/mnt/ssd** directory with **datadir** subdirectory created  
-within (user **eth** should be the owner).
+You can use the **ethbian-ssd-init.sh** script to initialize a new disk drive  
+or remount your partition after upgrading Ethbian.  
+If you prefer to do this manually - SSD should be mounted to the **/mnt/ssd** directory  
+with **datadir** subdirectory created within (user **eth** should be the owner).
+
+#### switching to 64bit kernel
+
+Because of memory allocation problem with the latest Raspbian and RPi4  
+you should switch to 64bit kernel - by executing the **ethbian-64bit.sh** script.  
+If you don't - when fully synced, geth will crash every couple of minutes/hours  
+causing your Pi to hang eventually.  
 
 #### geth upgrade
 

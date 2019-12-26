@@ -299,8 +299,9 @@ sudo sed -i 's/^;allow_sign_up = true/allow_sign_up = false/' /etc/grafana/grafa
 sudo systemctl daemon-reload
 sudo systemctl enable grafana-server
 sudo systemctl start grafana-server
-sleep 3
+sleep 5
 sudo systemctl stop grafana-server
+sleep 5
 sudo grafana-cli plugins install grafana-worldmap-panel
 sudo grafana-cli plugins install grafana-clock-panel
 cat admin/conf/grafana_ds_influx.sql | sudo sqlite3 /var/lib/grafana/grafana.db
