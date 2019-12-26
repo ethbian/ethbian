@@ -287,8 +287,9 @@ wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
 sudo /bin/bash -c 'echo "deb https://packages.grafana.com/oss/deb stable main" > /etc/apt/sources.list.d/grafana.list'
 sudo apt-get update
 sudo apt-get install -y grafana
-
 sudo systemctl stop grafana-server
+sleep 10
+
 sudo cp /etc/grafana/grafana.ini /etc/grafana/grafana.ini.org
 sudo sed -i 's/^;reporting_enabled = true/reporting_enabled = false/' /etc/grafana/grafana.ini
 sudo sed -i 's/^;check_for_updates = true/check_for_updates = false/' /etc/grafana/grafana.ini
@@ -299,7 +300,7 @@ sudo sed -i 's/^;allow_sign_up = true/allow_sign_up = false/' /etc/grafana/grafa
 sudo systemctl daemon-reload
 sudo systemctl enable grafana-server
 sudo systemctl start grafana-server
-sleep 5
+sleep 10
 sudo systemctl stop grafana-server
 sleep 5
 sudo grafana-cli plugins install grafana-worldmap-panel
