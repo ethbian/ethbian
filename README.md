@@ -33,6 +33,9 @@ To verify the checksum of a downloaded file:
 
 - restart the box
 - login again (user: pi/pass: ethbian)
+- register (free) for a MaxMind account and obtain a license key in order to download GeoLite2 database (free)  
+  Visit [https://www.maxmind.com/en/geolite2/signup](MaxMind page) to register,  
+  [https://www.maxmind.com/en/accounts/214108/geoip/downloads](download) the GeoLite2City db and save the file as /usr/local/lib/collectd/geolite_city.mmdb
 
 ## first steps
 
