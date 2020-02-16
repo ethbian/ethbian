@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.5   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.6   *"
 echo "*****************************************"
 echo ""
 
@@ -105,7 +105,7 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
-               v0.5
+               v0.6
 
 admin commands (for the 'pi' user):
   ethbian-64bit.sh - switch to 64bit kernel

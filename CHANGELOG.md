@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.6] - 2020-02-16
+
+### Changed
+
+- Raspbian February 2020
+- Geth 1.9.10
+
 ## [v0.5] - 2019-12-27
 
 ### Added

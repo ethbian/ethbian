@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*       ETHBIAN INSTALL TEST v0.5       *"
+echo "*       ETHBIAN INSTALL TEST v0.6       *"
 echo "*****************************************"
 echo ""
 echo "*RR - requires reboot"
