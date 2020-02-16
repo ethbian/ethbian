@@ -6,11 +6,6 @@ echo "*    ETHBIAN SD CARD IMAGE SETUP v0.6   *"
 echo "*****************************************"
 echo ""
 
-sudo locale-gen en_GB.UTF-8
-sudo update-locale LC_ALL=en_GB.UTF-8 LANG=en_GB.UTF-8 LANGUAGE=en_GB.UTF-8
-export LC_ALL=en_GB.UTF-8
-export LANGUAGE=en_GB.UTF-8
-
 function create_logrotate_config () {
   sudo /bin/bash -c "cat << EOF > /etc/logrotate.d/$1
 /var/log/$2
