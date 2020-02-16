@@ -15,7 +15,7 @@ Already prepared sd-card image can be found [here](https://ethbian.org/downloads
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
-| ethbian-v0.6-2020-02-16.img.gz |  |
+| ethbian-v0.6-2020-02-16.img.gz | 7f8fd9d7003cc7d80eabf95dd3a934b8be9b86df164e30652d9b196bc1d62ae9 |
 
 To verify the checksum of a downloaded file:
 

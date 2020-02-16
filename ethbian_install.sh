@@ -134,7 +134,6 @@ echo -e "\nalias gat='sudo /usr/local/bin/gat'" >> /home/pi/.bashrc
 cd /tmp
 git clone https://github.com/ethbian/ethbian.git
 cd ethbian
-git checkout v0.6
 
 chmod +x admin/scripts/*
 sudo chown root:root admin/scripts/*
