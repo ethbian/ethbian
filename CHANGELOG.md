@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Raspbian February 2020
 - Geth 1.9.10
-- GeoLite2 db: if creating your own image you need to register for a MaxMind account
+- ethbian_install.sh
 
 ## [v0.5] - 2019-12-27
 
