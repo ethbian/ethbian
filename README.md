@@ -2,7 +2,7 @@
 
 The easy way to run a full Ethereum node on Raspberry Pi 4  
 **Ethbian = Raspbian + Geth + Grafana**  
-Lastest version: **v0.5**  
+Lastest version: **v0.6**  
 Homepage: [https://ethbian.org](https://ethbian.org)
 
 ## quick start
@@ -11,11 +11,11 @@ Homepage: [https://ethbian.org](https://ethbian.org)
 
 #### a) download ethbian image
 
-Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.5-2019-12-27.img.gz)
+Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.6-2020-02-16.img.gz)
 
 | ethbian image file             | sha 256 checksum                                                 |
 | ------------------------------ | ---------------------------------------------------------------- |
-| ethbian-v0.5-2019-12-27.img.gz | a892e68476a770e7ec67f4a82630d32be03845ded6d1b88e61e559509c248e38 |
+| ethbian-v0.6-2020-02-16.img.gz | 7f8fd9d7003cc7d80eabf95dd3a934b8be9b86df164e30652d9b196bc1d62ae9 |
 
 To verify the checksum of a downloaded file:
 
@@ -33,6 +33,9 @@ To verify the checksum of a downloaded file:
 
 - restart the box
 - login again (user: pi/pass: ethbian)
+- register (free) for a MaxMind account and obtain a license key in order to download GeoLite2 database (free)  
+  Visit [MaxMind page](https://www.maxmind.com/en/geolite2/signup) to register, [download](https://www.maxmind.com/en/accounts/214108/geoip/downloads) the GeoLite2City db and  
+  save the file as /usr/local/lib/collectd/geolite_city.mmdb
 
 ## first steps
 

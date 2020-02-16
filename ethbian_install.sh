@@ -2,7 +2,7 @@
 
 echo ""
 echo "*****************************************"
-echo "*    ETHBIAN SD CARD IMAGE SETUP v0.5   *"
+echo "*    ETHBIAN SD CARD IMAGE SETUP v0.6   *"
 echo "*****************************************"
 echo ""
 
@@ -105,7 +105,7 @@ sudo chmod +x /usr/local/bin/gat
 sudo /bin/bash -c 'cat << EOF > /etc/motd
 
     --- Welcome to Ethbian! ---
-               v0.5
+               v0.6
 
 admin commands (for the 'pi' user):
   ethbian-64bit.sh - switch to 64bit kernel
@@ -241,19 +241,9 @@ create_logrotate_config 'collectd' 'collectd.log'
 echo ""
 
 echo "  # geth_peers_geo2influx..."
-GEODB_FILE='GeoLite2-City.tar.gz'
 GEO_SCRIPT='geth_peers_geo2influx.py'
 GEO_LOG='/var/log/geo2influx.log'
 GITHUB_GEO2INFLUX='https://raw.githubusercontent.com/ethbian/geth_peers_geo2influx/master/'
-
-cd /tmp
-wget https://geolite.maxmind.com/download/geoip/database/$GEODB_FILE
-if [ -f $GEODB_FILE ]; then
-  sudo tar -zxf $GEODB_FILE --directory /usr/local/lib/collectd --strip-components 1 --wildcards GeoLite2-City_*/GeoLite2-City.mmdb
-  if [ $? -eq 0 ]; then
-    sudo mv /usr/local/lib/collectd/GeoLite2-City.mmdb /usr/local/lib/collectd/geolite_city.mmdb
-  fi
-fi
 sudo touch $GEO_LOG
 sudo chown eth $GEO_LOG
 create_logrotate_config 'geo2influx' 'geo2influx.log'
