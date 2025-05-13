@@ -3,28 +3,11 @@
 The easy way to run a full Ethereum node on Raspberry Pi 4  
 **Ethbian = Raspbian + Geth + Grafana**  
 Lastest version: **v0.6**  
-Homepage: [https://ethbian.org](https://ethbian.org)
 
 ## quick start
 
 ### installation
-
-#### a) download ethbian image
-
-Already prepared sd-card image can be found [here](https://ethbian.org/downloads/ethbian-v0.6-2020-02-16.img.gz)
-
-| ethbian image file             | sha 256 checksum                                                 |
-| ------------------------------ | ---------------------------------------------------------------- |
-| ethbian-v0.6-2020-02-16.img.gz | 7f8fd9d7003cc7d80eabf95dd3a934b8be9b86df164e30652d9b196bc1d62ae9 |
-
-To verify the checksum of a downloaded file:
-
-| system | command                  |
-| ------ | ------------------------ |
-| Mac    | shasum -a 256 _filename_ |
-| Linux  | sha256sum _filename_     |
-
-#### b) or create your own image
+#### create your own image
 
 - download & install Raspbian Buster Lite
 - login (user: pi/pass: raspberry) and execute:
@@ -114,5 +97,3 @@ With network configured and disk mounted you are ready to go.
 **gat** :attach to geth console  
 **gsync** :shows geth synchronization progress  
 **/var/log/geth.log** :geth logs
-
-For more details visit [https://ethbian.org](https://ethbian.org)
